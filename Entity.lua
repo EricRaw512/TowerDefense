@@ -2,11 +2,12 @@
 
 Entity = Objects:extend()
 
-function Entity:new(x, y, width, height)
+function Entity:new(x, y, width, height, hp)
     self.x = x
     self.y = y
     self.width = width
     self.height = height
+    self.hp = hp
     self.last = {}
     self.last.x =self.x
     self.last.y = self.y
@@ -53,7 +54,9 @@ function Entity:resolveCollision(e)
                 self:collide(e, "top")
             end
         end
+        return true
     end
+    return false
 end
 
 function Entity:collide(e, direction)

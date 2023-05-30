@@ -7,19 +7,23 @@ function love.load()
     require "entity"
     require "player"
     require "enemy"
+    require "crystal"
 
     windowsWidth = love.graphics.getWidth()
     windowsHeight = love.graphics.getHeight()
-    player = Player(100, 100, 50, 100)
-    enemy = Enemy(100, windowsHeight / 2 + 50, 50, 50)
-
+    player = Player(100, 100, 50, 100, 100)
+    enemy = Enemy(100, windowsHeight / 2 + 50, 50, 50, 50, 50)
+    crystal = Crystal(windowsWidth / 2, windowsHeight / 2, 50, 100, 1000)
 end
 
 function love.update(dt)
     player:update(dt)
     enemy:update(dt)
     player:resolveCollision(enemy)
-    --print(player.gravity)
+    if enemy:resolveCollision(crystal) then
+        enemy:attack(crystal, dt)
+    end
+    print(crystal.hp)
 end
 
 function love.draw()
@@ -30,6 +34,8 @@ function love.draw()
     love.graphics.line(player.x, player.y, enemy.x, enemy.y)
     love.graphics.setColor(1, 1, 1)
     love.graphics.line(0, windowsHeight / 2 + player.height, windowsWidth, windowsHeight / 2 + player.height)
+    love.graphics.setColor(0, 1, 0)
+    crystal:draw()
 end
 
 function love.keypressed(key)

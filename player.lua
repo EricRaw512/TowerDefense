@@ -2,8 +2,8 @@
 
 Player = Entity:extend()
 
-function Player:new(x, y, width, height)
-    Player.super.new(self, x, y, width, height)
+function Player:new(x, y, width, height, hp)
+    Player.super.new(self, x, y, width, height, hp)
     self.weight = 400
     self.gravity = 0
     self.strength = 10
