@@ -2,12 +2,15 @@
 
 Enemy = Entity:extend()
 
-function Enemy:new(x, y, width, height, hp, damage)
-    Enemy.super.new(self, x, y, width, height, hp, damage)
+function Enemy:new(x, y, hp, damage)
+    Enemy.super.new(self, x, y, hp, damage)
     self.speed = 100
     self.strength = 150
     self.time = 0
+    self.hp = 50
     self.damage = damage
+    self.width = 50
+    self.height = 50
 end
 
 function Enemy:update(dt)

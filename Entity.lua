@@ -2,7 +2,7 @@
 
 Entity = Objects:extend()
 
-function Entity:new(x, y, width, height, hp)
+function Entity:new(x, y, width, height)
     self.x = x
     self.y = y
     self.width = width
