@@ -12,11 +12,13 @@ end
 
 function Tower:update(dt)
     self.timer = self.timer - dt
-    print(self.timer)
     local bulletSpeed = 250
-    for i, bullet in ipairs(self.bullets) do
-        bullet.x = (bullet.x + math.cos(bullet.angle) * bulletSpeed * dt)
-        bullet.y = (bullet.y + math.sin(bullet.angle) * bulletSpeed * dt)
+    for i = #self.bullets, 1, -1 do
+        self.bullets[i].x = (self.bullets[i].x + math.cos(self.bullets[i].angle) * bulletSpeed * dt)
+        self.bullets[i].y = (self.bullets[i].y + math.sin(self.bullets[i].angle) * bulletSpeed * dt)
+        if self.bullets[i].x < 0 or self.bullets[i].x > 800 or self.bullets[i].y < 0 or self.bullets[i].y > 600 then
+            table.remove(self.bullets, i)
+        end
     end
 end
 
