@@ -7,7 +7,6 @@ function Entity:new(x, y, width, height)
     self.y = y
     self.width = width
     self.height = height
-    self.hp = hp
     self.last = {}
     self.last.x =self.x
     self.last.y = self.y
