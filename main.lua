@@ -31,9 +31,12 @@ function love.update(dt)
     for i = #enemy, 1, -1 do
         enemy[i]:update(dt)
         enemy[i]:resolveCollision(player)
-        if enemy[i]:resolveCollision(crystal) and not crystal.defeat then
-            enemy[i]:attack(crystal, dt)
-            crystal:update(dt)
+        if enemy[i].hp < 0 then
+            table.remove(enemy, i)
+        else if enemy[i]:resolveCollision(crystal) and not crystal.defeat then
+                enemy[i]:attack(crystal, dt)
+                crystal:update(dt)
+            end
         end
     end
 end
