@@ -15,20 +15,20 @@ function love.load()
     player = Player(windowsWidth / 2 - 50, windowsHeight / 2, 50, 100)
     enemy = {}
     crystal = Crystal(windowsWidth / 2, windowsHeight / 2, 50, 100)
-    tower = Tower(windowsWidth / 2 + 100, windowsHeight / 2 + 50)
+    tower = Tower(windowsWidth / 2 + 70, windowsHeight / 2 - 20)
 
     spawnTimer = 0
 end
 
 function love.update(dt)
     spawnTimer = spawnTimer - dt
-    if spawnTimer < 0 then
+    if spawnTimer < 0 and not crystal.defeat then
         spawnTimer = 5
         table.insert(enemy, Enemy(100, windowsHeight / 2 + 50, 50, 50))
     end
     player:update(dt)
+    tower:update(dt)
     for i = #enemy, 1, -1 do
-        print(tower:target(enemy[i]))
         enemy[i]:update(dt)
         enemy[i]:resolveCollision(player)
         if enemy[i]:resolveCollision(crystal) and not crystal.defeat then
