@@ -15,7 +15,7 @@ function love.load()
     player = Player(windowsWidth / 2 - 50, windowsHeight / 2, 50, 100)
     enemy = {}
     crystal = Crystal(windowsWidth / 2, windowsHeight / 2, 50, 100)
-    tower = Tower(windowsWidth / 2 + 70, windowsHeight / 2 - 20)
+    tower = {}
 
     spawnTimer = 0
 end
@@ -27,7 +27,12 @@ function love.update(dt)
         table.insert(enemy, Enemy(100, windowsHeight / 2 + 50, 50, 50))
     end
     player:update(dt)
-    tower:update(dt)
+    for i =#tower, 1, -1 do
+        tower[i]:update(dt, enemy)
+        for j = #enemy, 1, -1 do
+            tower[i]:target(enemy[j])
+        end
+    end
     for i = #enemy, 1, -1 do
         enemy[i]:update(dt)
         enemy[i]:resolveCollision(player)
@@ -49,20 +54,21 @@ function love.draw()
     love.graphics.setColor(0, 1, 1)
     player:draw()
     love.graphics.setColor(0, 1, 1)
-    tower:draw()
+    for i = #tower, 1 , -1 do
+        tower[i]:draw()
+    end
     for i, v in ipairs(enemy) do
         love.graphics.setColor(1, 0, 0)
         v:draw()
-        if tower:target(v) then
-            love.graphics.setColor(1, 1, 0)
-            love.graphics.line(v.x + v.width, v.y + v.width / 2, tower.x + tower.width / 2, tower.y + tower.height / 2)
-        end
     end
 end
 
 function love.keypressed(key)
     if key == "up" then
         player:jump()
+    elseif love.keyboard.isDown("space") then
+        local gridX, gridY = player:placeTower(tower)
+        table.insert(tower, Tower(gridX, gridY))
     end
 end
 

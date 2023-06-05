@@ -51,3 +51,11 @@ function Player:collide(e, direction)
         self.canJump = true
     end
 end
+
+function Player:placeTower(e)
+    local gridSize = 50
+    local gridX = math.floor((self.x - self.width)/ gridSize) * gridSize
+    local gridY = math.floor((self.y + self.height / 2) / gridSize) * gridSize
+    return gridX, gridY
+    --love.graphics.rectangle("line", gridX, gridY - gridSize, e.width, e.height)
+end

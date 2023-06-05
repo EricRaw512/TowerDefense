@@ -4,7 +4,7 @@ Enemy = Entity:extend()
 
 function Enemy:new(x, y, hp, damage)
     Enemy.super.new(self, x, y, hp, damage)
-    self.speed = 100
+    self.speed = 50
     self.strength = 150
     self.time = 0
     self.hp = 50

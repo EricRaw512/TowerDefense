@@ -7,16 +7,25 @@ function Tower:new(x, y)
     self.height = 50
     self.hp = 250
     self.bullets = {}
-    self.timer = 2
+    self.timer = 0
 end
 
-function Tower:update(dt)
+function Tower:update(dt, enemy)
     self.timer = self.timer - dt
     local bulletSpeed = 250
     for i = #self.bullets, 1, -1 do
         self.bullets[i].x = (self.bullets[i].x + math.cos(self.bullets[i].angle) * bulletSpeed * dt)
         self.bullets[i].y = (self.bullets[i].y + math.sin(self.bullets[i].angle) * bulletSpeed * dt)
-        if self.bullets[i].x < 0 or self.bullets[i].x > 800 or self.bullets[i].y < 0 or self.bullets[i].y > 600 then
+        local hit = false
+        for j = #enemy, 1, -1 do
+            if Tower:bulletCollision(self.bullets[i], enemy[j]) then
+                enemy[j].hp = enemy[j].hp - 25
+                table.remove(self.bullets, i)
+                hit = true
+                break
+            end
+        end
+        if not hit and (self.bullets[i].x < 0 or self.bullets[i].x > love.graphics.getWidth() or self.bullets[i].y < 0 or self.bullets[i].y > love.graphics.getHeight()) then
             table.remove(self.bullets, i)
         end
     end
@@ -30,14 +39,11 @@ function Tower:target(e)
         self.timer = 2
         local angle = math.atan2(distanceY, distanceX)
         table.insert(self.bullets, {
-            x = self.x + math.cos(angle),
+            x = self.x + self.width / 2+ math.cos(angle),
             y = self.y + self.height / 2 + math.sin(angle),
             angle = angle
         })
     end
- 
-    
-
 end
 
 function Tower:draw()
@@ -45,4 +51,11 @@ function Tower:draw()
     for i, bullet in ipairs(self.bullets) do
         love.graphics.circle("fill", bullet.x, bullet.y, 5)
     end
+end
+
+function Tower:bulletCollision(bullet, e)
+    return bullet.x + 10 > e.x
+    and bullet.x < e.x + e.width
+    and bullet.y + 10 > e.y
+    and bullet.y + e.y + e.height
 end
