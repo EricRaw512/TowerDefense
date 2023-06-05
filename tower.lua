@@ -47,8 +47,10 @@ function Tower:target(e)
 end
 
 function Tower:draw()
+    love.graphics.setColor(0, 1, 1)
     love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
     for i, bullet in ipairs(self.bullets) do
+        love.graphics.setColor(1, 1, 1)
         love.graphics.circle("fill", bullet.x, bullet.y, 5)
     end
 end

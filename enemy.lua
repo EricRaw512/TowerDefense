@@ -4,10 +4,10 @@ Enemy = Entity:extend()
 
 function Enemy:new(x, y, hp, damage)
     Enemy.super.new(self, x, y, hp, damage)
-    self.speed = 50
+    self.speed = love.math.random(50, 200)
     self.strength = 150
     self.time = 0
-    self.hp = 50
+    self.hp = love.math.random(50, 250)
     self.damage = damage
     self.width = 50
     self.height = 50

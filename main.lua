@@ -17,12 +17,19 @@ function love.load()
     crystal = Crystal(windowsWidth / 2, windowsHeight / 2, 50, 100)
     tower = {}
 
+    placeTowerFlag = false
+    startingPoint = 500
     spawnTimer = 0
+    timeLimit = 0
 end
 
 function love.update(dt)
     spawnTimer = spawnTimer - dt
-    if spawnTimer < 0 and not crystal.defeat then
+    if spawnTimer <= timeLimit and not crystal.defeat then
+        timeLimit = timeLimit + dt * 5
+        if timeLimit >= 4 then
+            timeLimit = 4
+        end
         spawnTimer = 5
         table.insert(enemy, Enemy(100, windowsHeight / 2 + 50, 50, 50))
     end
@@ -38,6 +45,7 @@ function love.update(dt)
         enemy[i]:resolveCollision(player)
         if enemy[i].hp < 0 then
             table.remove(enemy, i)
+            startingPoint = startingPoint + 50
         else if enemy[i]:resolveCollision(crystal) and not crystal.defeat then
                 enemy[i]:attack(crystal, dt)
                 crystal:update(dt)
@@ -53,7 +61,6 @@ function love.draw()
     crystal:draw()
     love.graphics.setColor(0, 1, 1)
     player:draw()
-    love.graphics.setColor(0, 1, 1)
     for i = #tower, 1 , -1 do
         tower[i]:draw()
     end
@@ -61,15 +68,22 @@ function love.draw()
         love.graphics.setColor(1, 0, 0)
         v:draw()
     end
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print(startingPoint, 10, 10)
 end
 
 function love.keypressed(key)
     if key == "up" then
         player:jump()
-    elseif love.keyboard.isDown("space") then
-        local gridX, gridY = player:placeTower(tower)
-        table.insert(tower, Tower(gridX, gridY))
+    elseif key == ("space") and not placeTowerFlag then
+        if startingPoint >= 100 then
+            placeTowerFlag = true
+            startingPoint = startingPoint - 100
+            local gridX, gridY = player:placeTower(tower)
+            table.insert(tower, Tower(gridX, gridY))
+        end
     end
+    placeTowerFlag = false
 end
 
 ---@diagnostic disable-next-line: undefined-field
