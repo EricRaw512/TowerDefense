@@ -15,7 +15,7 @@ function love.load()
     player = Player(windowsWidth / 2 - 50, windowsHeight / 2, 50, 100)
     enemy = {}
     crystal = Crystal(windowsWidth / 2, windowsHeight / 2, 50, 100)
-    tower = {}
+    towers = {}
 
     placeTowerFlag = false
     startingPoint = 500
@@ -34,10 +34,16 @@ function love.update(dt)
         table.insert(enemy, Enemy(100, windowsHeight / 2 + 50, 50, 50))
     end
     player:update(dt)
-    for i =#tower, 1, -1 do
-        tower[i]:update(dt, enemy)
+    for i =#towers, 1, -1 do
+        towers[i]:update(dt, enemy)
         for j = #enemy, 1, -1 do
-            tower[i]:target(enemy[j])
+            towers[i]:target(enemy[j])
+            if enemy[j]:resolveCollision(towers[i]) then
+                enemy[j]:attack(towers[i], dt)
+            end
+        end
+        if towers[i].hp < 0 then
+            table.remove(towers, i)
         end
     end
     for i = #enemy, 1, -1 do
@@ -46,10 +52,9 @@ function love.update(dt)
         if enemy[i].hp < 0 then
             table.remove(enemy, i)
             startingPoint = startingPoint + 50
-        else if enemy[i]:resolveCollision(crystal) and not crystal.defeat then
+        elseif enemy[i]:resolveCollision(crystal) and not crystal.defeat then
                 enemy[i]:attack(crystal, dt)
                 crystal:update(dt)
-            end
         end
     end
 end
@@ -61,29 +66,41 @@ function love.draw()
     crystal:draw()
     love.graphics.setColor(0, 1, 1)
     player:draw()
-    for i = #tower, 1 , -1 do
-        tower[i]:draw()
+    for i = #towers, 1 , -1 do
+        towers[i]:draw()
     end
     for i, v in ipairs(enemy) do
         love.graphics.setColor(1, 0, 0)
         v:draw()
     end
     love.graphics.setColor(1, 1, 1)
-    love.graphics.print(startingPoint, 10, 10)
+    love.graphics.print("Points : " ..startingPoint, 10, 10)
 end
 
 function love.keypressed(key)
     if key == "up" then
         player:jump()
-    elseif key == ("space") and not placeTowerFlag then
+    elseif key == "space" and not placeTowerFlag then
         if startingPoint >= 100 then
             placeTowerFlag = true
-            startingPoint = startingPoint - 100
-            local gridX, gridY = player:placeTower(tower)
-            table.insert(tower, Tower(gridX, gridY))
+            local towerX, towerY = Tower:placeInFrontOfCharacter(player)
+            if not towersExist(towers, towerX, towerY) then
+                startingPoint = startingPoint - 100
+                table.insert(towers, Tower(towerX, towerY))
+            end
+
         end
     end
     placeTowerFlag = false
+end
+
+function towersExist(towers, towerX, towerY)
+    for i, tower in ipairs(towers) do
+        if tower.x == towerX and tower.y == towerY then
+            return true
+        end
+    end
+    return false
 end
 
 ---@diagnostic disable-next-line: undefined-field

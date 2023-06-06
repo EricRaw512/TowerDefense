@@ -8,6 +8,7 @@ function Tower:new(x, y)
     self.hp = 250
     self.bullets = {}
     self.timer = 0
+    self.strength = 200
 end
 
 function Tower:update(dt, enemy)
@@ -18,7 +19,7 @@ function Tower:update(dt, enemy)
         self.bullets[i].y = (self.bullets[i].y + math.sin(self.bullets[i].angle) * bulletSpeed * dt)
         local hit = false
         for j = #enemy, 1, -1 do
-            if Tower:bulletCollision(self.bullets[i], enemy[j]) then
+            if self:bulletCollision(self.bullets[i], enemy[j]) then
                 enemy[j].hp = enemy[j].hp - 25
                 table.remove(self.bullets, i)
                 hit = true
@@ -59,5 +60,14 @@ function Tower:bulletCollision(bullet, e)
     return bullet.x + 10 > e.x
     and bullet.x < e.x + e.width
     and bullet.y + 10 > e.y
-    and bullet.y + e.y + e.height
+    and bullet.y < e.y + e.height
+end
+
+function Tower:placeInFrontOfCharacter(player)
+    local gridSize = 50
+    local offsetX = math.cos(player.facingAngle) * gridSize
+    local offsetY = math.sin(player.facingAngle) * gridSize
+    local gridX = math.floor((player.x + offsetX) / gridSize) * gridSize
+    local gridY = math.floor((player.y + player.height / 2+ offsetY) / gridSize) * gridSize
+    return gridX, gridY
 end

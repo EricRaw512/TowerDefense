@@ -7,6 +7,7 @@ function Player:new(x, y, width, height, hp)
     self.weight = 400
     self.gravity = 0
     self.strength = 100
+    self.facingAngle = 0
     self.canJump =false
 end
 
@@ -15,8 +16,10 @@ function Player:update(dt)
 
     if love.keyboard.isDown("left") then
         self.x = self.x - 200 * dt
+        self.facingAngle = math.pi
     elseif love.keyboard.isDown("right") then
         self.x = self.x + 200 * dt
+        self.facingAngle = 0
     end
 
     self.gravity = self.gravity + self.weight * dt
@@ -52,6 +55,7 @@ function Player:collide(e, direction)
     end
 end
 
+--[[
 function Player:placeTower(e)
     local gridSize = 50
     local gridX = math.floor((self.x - self.width)/ gridSize) * gridSize
@@ -59,3 +63,4 @@ function Player:placeTower(e)
     return gridX, gridY
     --love.graphics.rectangle("line", gridX, gridY - gridSize, e.width, e.height)
 end
+]]--

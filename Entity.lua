@@ -7,9 +7,7 @@ function Entity:new(x, y, width, height)
     self.y = y
     self.width = width
     self.height = height
-    self.last = {}
-    self.last.x =self.x
-    self.last.y = self.y
+    self.last = { x = self.x, y = self.y}
     self.strength = 0
 end
 
@@ -30,7 +28,7 @@ function Entity:checkCollision(e)
     return self.x + self.width > e.x
     and self.x < e.x + e.width
     and self.y + self.height > e.y
-    and self.y + e.y + e.height
+    and self.y < e.y + e.height
 end
 
 function Entity:resolveCollision(e)
