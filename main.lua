@@ -64,8 +64,6 @@ function love.draw()
     love.graphics.line(0, windowsHeight / 2 + player.height, windowsWidth, windowsHeight / 2 + player.height)
     love.graphics.setColor(0, 1, 0)
     crystal:draw()
-    love.graphics.setColor(0, 1, 1)
-    player:draw()
     for i = #towers, 1 , -1 do
         towers[i]:draw()
     end
@@ -73,6 +71,8 @@ function love.draw()
         love.graphics.setColor(1, 0, 0)
         v:draw()
     end
+    love.graphics.setColor(0, 0.5, 1)
+    player:draw()
     love.graphics.setColor(1, 1, 1)
     love.graphics.print("Points : " ..startingPoint, 10, 10)
 end
@@ -80,26 +80,35 @@ end
 function love.keypressed(key)
     if key == "up" then
         player:jump()
-    elseif key == "space" and not placeTowerFlag then
+    elseif key == "space" and not placeTowerFlag and player.gravity == 0 then
         if startingPoint >= 100 then
             placeTowerFlag = true
             local towerX, towerY = Tower:placeInFrontOfCharacter(player)
-            if not towersExist(towers, towerX, towerY) then
+            if towerX ~= windowsWidth / 2 and towerX > 100 and not isOccupied(towerX, towerY) then
                 startingPoint = startingPoint - 100
                 table.insert(towers, Tower(towerX, towerY))
             end
-
         end
     end
     placeTowerFlag = false
 end
 
-function towersExist(towers, towerX, towerY)
-    for i, tower in ipairs(towers) do
-        if tower.x == towerX and tower.y == towerY then
+function isOccupied(gridX, gridY)
+    local gridSize = 50
+    for i, t in ipairs(towers) do
+        if t.x == gridX and t.y == gridY then
             return true
         end
     end
+
+    for i, e in ipairs(enemy) do
+        local enemyGridX = math.floor((e.x + e.width / 2) / gridSize) * gridSize
+        local enemyGridY = math.floor((e.y + e.height / 2) / gridSize) * gridSize
+        if enemyGridX == gridX and enemyGridY == gridY then
+            return true
+        end
+    end
+
     return false
 end
 

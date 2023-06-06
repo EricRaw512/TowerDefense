@@ -67,7 +67,7 @@ function Tower:placeInFrontOfCharacter(player)
     local gridSize = 50
     local offsetX = math.cos(player.facingAngle) * gridSize
     local offsetY = math.sin(player.facingAngle) * gridSize
-    local gridX = math.floor((player.x + offsetX) / gridSize) * gridSize
-    local gridY = math.floor((player.y + player.height / 2+ offsetY) / gridSize) * gridSize
+    local gridX = math.floor((player.x + player.width / 2 + offsetX) / gridSize) * gridSize
+    local gridY = math.floor((player.y + player.height / 2 + offsetY) / gridSize) * gridSize
     return gridX, gridY
 end
