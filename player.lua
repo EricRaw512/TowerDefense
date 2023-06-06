@@ -24,9 +24,10 @@ function Player:update(dt)
 
     self.gravity = self.gravity + self.weight * dt
     self.y = self.y + self.gravity * dt
-    if self.y > 300 then
+    local windowsHeight = love.graphics.getHeight() / 2
+    if self.y > windowsHeight then
         self.gravity = 0
-        self.y = 300
+        self.y = windowsHeight
         self.canJump = true
     end
     

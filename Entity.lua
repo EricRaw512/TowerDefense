@@ -25,10 +25,10 @@ function Entity:wasHorizontal(e)
 end
 
 function Entity:checkCollision(e)
-    return self.x + self.width > e.x
-    and self.x < e.x + e.width
-    and self.y + self.height > e.y
-    and self.y < e.y + e.height
+    return self.x + self.width >= e.x
+    and self.x <= e.x + e.width
+    and self.y + self.height >= e.y
+    and self.y <= e.y + e.height
 end
 
 function Entity:resolveCollision(e)
