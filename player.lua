@@ -24,7 +24,7 @@ function Player:update(dt)
 
     self.gravity = self.gravity + self.weight * dt
     self.y = self.y + self.gravity * dt
-    local windowsHeight = love.graphics.getHeight() / 2
+    local windowsHeight = 800 / 2 - self.height
     if self.y > windowsHeight then
         self.gravity = 0
         self.y = windowsHeight

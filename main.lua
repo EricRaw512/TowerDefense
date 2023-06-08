@@ -9,6 +9,7 @@ function love.load()
     require "enemy"
     require "crystal"
     require "tower"
+    require "wall"
 
     windowsWidth = 800
     windowsHeight = 600
@@ -16,12 +17,12 @@ function love.load()
     enemy = {}
     crystal = Crystal(windowsWidth / 2, windowsHeight / 2, 50, 100)
     player = Player(windowsWidth / 2, windowsHeight / 2, 50, 100)
-    print(player.y.. " " ..crystal.y)
     towers = {}
+    walls = {}
 
     placeTowerFlag = false
     startingPoint = 500
-    spawnTimer = 0
+    spawnTimer = 5
     timeLimit = 0
 end
 
@@ -38,9 +39,19 @@ function love.update(dt)
         if enemy[i].hp < 0 then
             table.remove(enemy, i)
             startingPoint = startingPoint + 50
-        elseif enemy[i]:resolveCollision(crystal) and not crystal.defeat then
+        else 
+            if enemy[i]:resolveCollision(crystal) and not crystal.defeat then
                 enemy[i]:attack(crystal, dt)
                 crystal:update(dt)
+            end
+            for j = #walls, 1, -1 do
+                if enemy[i]:resolveCollision(walls[j]) then
+                    enemy[i]:attack(walls[j], dt)
+                end
+                if walls[j].hp <= 0 then
+                    table.remove(walls, j)
+                end
+            end
         end
     end
     for i =#towers, 1, -1 do
@@ -71,8 +82,15 @@ function love.draw()
         love.graphics.setColor(1, 0, 0)
         v:draw()
     end
+    love.graphics.setColor(0.5, 1, 1)
+    for i, wall in ipairs(walls) do
+        wall:draw()
+    end
     for i, tower in ipairs(towers) do
-        tower:draw()
+        tower:drawTower()
+    end
+    for i, tower in ipairs(towers) do
+        tower:drawBullet()
     end
     love.graphics.setColor(0, 0.5, 1)
     player:draw()
@@ -103,9 +121,27 @@ function love.keypressed(key)
                 table.insert(towers, Tower(towerX, towerY))
             end
         end
+    elseif key == "n" and not placeTowerFlag and player.gravity == 0 then
+        if startingPoint >= 100 then
+            local isPlayerOnEnemy = false
+            for i, e in ipairs(enemy) do
+                if player.y + player.height <= e.y and
+                    player.x + player.width >= e.x and
+                    player.x <= e.x + e.width then
+                    isPlayerOnEnemy = true
+                    break
+                end
+            end
+            placeTowerFlag = true
+            local towerX, towerY = placeInFrontOfCharacter(player)
+            if not isPlayerOnEnemy and towerX ~= windowsWidth / 2 and towerX > 100 and not isOccupied(towerX, towerY) then
+                startingPoint = startingPoint - 100
+                table.insert(walls, Wall(towerX, towerY))
+            end
+        end
     end
     placeTowerFlag = false
-end
+    end
 
 function isOccupied(gridX, gridY)
     local gridSize = 50
@@ -122,8 +158,16 @@ function isOccupied(gridX, gridY)
             return true
         end
     end
-
     return false
+end
+
+function placeInFrontOfCharacter(player)
+    local gridSize = 50
+    local offsetX = math.cos(player.facingAngle) * gridSize
+    local offsetY = math.sin(player.facingAngle) * gridSize
+    local gridX = math.floor((player.x + player.width / 2 + offsetX) / gridSize) * gridSize
+    local gridY = math.floor((player.y + player.height / 2 + offsetY) / gridSize) * gridSize
+    return gridX, gridY
 end
 
 ---@diagnostic disable-next-line: undefined-field

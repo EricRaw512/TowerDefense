@@ -5,7 +5,7 @@ function Tower:new(x, y)
     Tower.super.new(self, x, y)
     self.width = 50
     self.height = 50
-    self.hp = 250
+    self.hp = 150
     self.bullets = {}
     self.timer = 0
     self.strength = 200
@@ -47,9 +47,12 @@ function Tower:target(e)
     end
 end
 
-function Tower:draw()
+function Tower:drawTower()
     love.graphics.setColor(0, 1, 1)
     love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+end
+
+function Tower:drawBullet()
     for i, bullet in ipairs(self.bullets) do
         love.graphics.setColor(1, 1, 1)
         love.graphics.circle("fill", bullet.x, bullet.y, 5)
