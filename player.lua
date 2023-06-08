@@ -24,15 +24,15 @@ function Player:update(dt)
 
     self.gravity = self.gravity + self.weight * dt
     self.y = self.y + self.gravity * dt
-    local windowsHeight = 800 / 2 - self.height
+    local windowsHeight = 600 / 2
     if self.y > windowsHeight then
         self.gravity = 0
         self.y = windowsHeight
         self.canJump = true
     end
     
-    if self.x + self.width > 800 then
-        self.x = 800 - self.width
+    if self.x + self.width > 1920 then
+        self.x = 1920 - self.width
     elseif self.x < 0 then
         self.x = 0
     end

@@ -20,6 +20,8 @@ function love.load()
     towers = {}
     walls = {}
 
+    placingTower = false
+    towerType = 0
     placeTowerFlag = false
     startingPoint = 500
     spawnTimer = 5
@@ -96,6 +98,10 @@ function love.draw()
     player:draw()
     love.graphics.setColor(1, 1, 1)
     love.graphics.print("Points : " .. startingPoint, 10, 10)
+    if placingTower then
+        local destinationX, destinationY = placeInFrontOfCharacter(player)
+        love.graphics.rectangle("line", destinationX, destinationY, 50, 50)
+    end
     
     love.graphics.pop()
 end
@@ -103,50 +109,46 @@ end
 function love.keypressed(key)
     if key == "up" then
         player:jump()
-    elseif key == "space" and not placeTowerFlag and player.gravity == 0 then
-        if startingPoint >= 100 then
-            local isPlayerOnEnemy = false
-            for i, e in ipairs(enemy) do
-                if player.y + player.height <= e.y and
-                    player.x + player.width >= e.x and
-                    player.x <= e.x + e.width then
-                    isPlayerOnEnemy = true
-                    break
-                end
-            end
-            placeTowerFlag = true
-            local towerX, towerY = Tower:placeInFrontOfCharacter(player)
-            if not isPlayerOnEnemy and towerX ~= windowsWidth / 2 and towerX > 100 and not isOccupied(towerX, towerY) then
-                startingPoint = startingPoint - 100
-                table.insert(towers, Tower(towerX, towerY))
+    elseif key == '1' and startingPoint >= 100 then
+        placingTower = true
+        towerType = 1
+    elseif key == '2' and startingPoint >= 100 then
+        placingTower = true
+        towerType = 2
+    elseif key == "space" and not placeTowerFlag and player.gravity == 0 and placingTower then
+        local isPlayerOnEnemy = false
+        for i, e in ipairs(enemy) do
+            if player.y + player.height <= e.y and
+                player.x + player.width >= e.x and
+                player.x <= e.x + e.width then
+                isPlayerOnEnemy = true
+                break
             end
         end
-    elseif key == "n" and not placeTowerFlag and player.gravity == 0 then
-        if startingPoint >= 100 then
-            local isPlayerOnEnemy = false
-            for i, e in ipairs(enemy) do
-                if player.y + player.height <= e.y and
-                    player.x + player.width >= e.x and
-                    player.x <= e.x + e.width then
-                    isPlayerOnEnemy = true
-                    break
-                end
-            end
-            placeTowerFlag = true
-            local towerX, towerY = placeInFrontOfCharacter(player)
-            if not isPlayerOnEnemy and towerX ~= windowsWidth / 2 and towerX > 100 and not isOccupied(towerX, towerY) then
-                startingPoint = startingPoint - 100
-                table.insert(walls, Wall(towerX, towerY))
+        placeTowerFlag = true
+        local towerX, towerY = Tower:placeInFrontOfCharacter(player)
+        if not isPlayerOnEnemy and towerX ~= windowsWidth / 2 and towerX > 100 and not isOccupied(towerX, towerY) then
+            startingPoint = startingPoint - 100
+            placingTower = false
+            if towerType == 1 then
+                table.insert(towers, Tower(towerX, towerY))
+            elseif towerType == 2 then
+                table.insert(walls, Wall(towerX, towerY))                 
             end
         end
     end
     placeTowerFlag = false
-    end
+end
 
 function isOccupied(gridX, gridY)
     local gridSize = 50
     for i, t in ipairs(towers) do
         if t.x == gridX and t.y == gridY then
+            return true
+        end
+    end
+    for i, w in ipairs(walls) do
+        if w.x == gridX and w.y == gridY then
             return true
         end
     end
