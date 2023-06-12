@@ -13,14 +13,15 @@ end
 
 function Player:update(dt)
     Player.super.update(self, dt)
-
+    local movementSpeed = 200 * dt
     if love.keyboard.isDown("left") then
-        self.x = self.x - 200 * dt
+        self.x = self.x - movementSpeed
         self.facingAngle = math.pi
     elseif love.keyboard.isDown("right") then
-        self.x = self.x + 200 * dt
+        self.x = self.x + movementSpeed
         self.facingAngle = 0
     end
+
 
     self.gravity = self.gravity + self.weight * dt
     self.y = self.y + self.gravity * dt
@@ -31,11 +32,7 @@ function Player:update(dt)
         self.canJump = true
     end
     
-    if self.x + self.width > 1920 then
-        self.x = 1920 - self.width
-    elseif self.x < 0 then
-        self.x = 0
-    end
+    self.x = math.max(0, math.min(self.x, 800 - self.width))
 end
 
 function Player:draw()
@@ -55,13 +52,3 @@ function Player:collide(e, direction)
         self.canJump = true
     end
 end
-
---[[
-function Player:placeTower(e)
-    local gridSize = 50
-    local gridX = math.floor((self.x - self.width)/ gridSize) * gridSize
-    local gridY = math.floor((self.y + self.height / 2) / gridSize) * gridSize
-    return gridX, gridY
-    --love.graphics.rectangle("line", gridX, gridY - gridSize, e.width, e.height)
-end
-]]--

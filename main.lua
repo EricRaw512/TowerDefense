@@ -2,6 +2,7 @@ if arg[2] == "debug" then
     require("lldebugger").start()
 end
 
+
 function love.load()
     Objects = require "classic"
     require "entity"
@@ -11,11 +12,13 @@ function love.load()
     require "tower"
     require "wall"
 
-    windowsWidth = 800
-    windowsHeight = 600
-   
+    love.window.setMode(1920, 1080, {resizable = true, borderless = false})
+    windowsWidth = love.graphics.getWidth()
+    windowsHeight = love.graphics.getHeight()
+    MR.load(560, 420)
+
     enemy = {}
-    crystal = Crystal(windowsWidth / 2, windowsHeight / 2, 50, 100)
+    crystal = Crystal(windowsWidth / 2 - 50, windowsHeight / 2, 50, 100)
     player = Player(windowsWidth / 2, windowsHeight / 2, 50, 100)
     towers = {}
     walls = {}
@@ -90,8 +93,6 @@ function love.draw()
     end
     for i, tower in ipairs(towers) do
         tower:drawTower()
-    end
-    for i, tower in ipairs(towers) do
         tower:drawBullet()
     end
     love.graphics.setColor(0, 0.5, 1)
@@ -160,7 +161,7 @@ function isOccupied(gridX, gridY)
             return true
         end
     end
-    return false
+    return false    
 end
 
 function placeInFrontOfCharacter(player)
@@ -169,6 +170,8 @@ function placeInFrontOfCharacter(player)
     local offsetY = math.sin(player.facingAngle) * gridSize
     local gridX = math.floor((player.x + player.width / 2 + offsetX) / gridSize) * gridSize
     local gridY = math.floor((player.y + player.height / 2 + offsetY) / gridSize) * gridSize
+    gridX = math.max(0, math.min(gridX, 1920 - player.width))
+    gridY = math.max(0, math.min(gridY, 1080 - player.height))
     return gridX, gridY
 end
 

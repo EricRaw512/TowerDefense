@@ -29,10 +29,9 @@ function Enemy:draw()
 end
 
 function Enemy:attack(e, dt)
-    if self.time < 0 then
+    self.time = self.time - dt
+    if self.time <= 0 then
         self.time = 3
         e.hp = e.hp - self.damage
-    else
-        self.time = self.time - dt
     end
 end
