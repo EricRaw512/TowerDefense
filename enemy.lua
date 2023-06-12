@@ -17,7 +17,7 @@ function Enemy:update(dt)
     Enemy.super.update(self, dt)
 
     self.x = self.x + self.speed * dt
-    if self.x + self.width > 800 then
+    if self.x + self.width > 1920 then
         self.speed = -self.speed
     elseif self.x <= 0 then
         self.speed = -self.speed

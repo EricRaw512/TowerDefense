@@ -2,7 +2,6 @@ if arg[2] == "debug" then
     require("lldebugger").start()
 end
 
-
 function love.load()
     Objects = require "classic"
     require "entity"
@@ -12,17 +11,18 @@ function love.load()
     require "tower"
     require "wall"
 
-    love.window.setMode(1920, 1080, {resizable = true, borderless = false})
-    windowsWidth = love.graphics.getWidth()
-    windowsHeight = love.graphics.getHeight()
-    MR.load(560, 420)
+    love.window.setMode(800, 600, {resizable=true, vsync=false})
+    windowsWidth = 1920
+    windowsHeight = 1080
 
     enemy = {}
-    crystal = Crystal(windowsWidth / 2 - 50, windowsHeight / 2, 50, 100)
-    player = Player(windowsWidth / 2, windowsHeight / 2, 50, 100)
+    crystal = Crystal(windowsWidth / 2 - 10, windowsHeight / 2 + 10, 50, 100)
+    player = Player(windowsWidth / 2, windowsHeight / 2 + 10, 50, 100)
     towers = {}
     walls = {}
 
+    offsetX = -player.x + 400
+    offsetY = -player.y + 300
     placingTower = false
     towerType = 0
     placeTowerFlag = false
@@ -35,7 +35,7 @@ function love.update(dt)
     spawnTimer = spawnTimer - dt
     if spawnTimer <= timeLimit and not crystal.defeat then
         spawnTimer = 5
-        table.insert(enemy, Enemy(100, windowsHeight / 2 + 50, 50, 50))
+        table.insert(enemy, Enemy(100, windowsHeight / 2 + 60, 50, 50))
     end
     player:update(dt)
     for i = #enemy, 1, -1 do
@@ -59,8 +59,10 @@ function love.update(dt)
             end
         end
     end
+    offsetX = -player.x + 400
+    offsetY = -player.y + 300
     for i =#towers, 1, -1 do
-        towers[i]:update(dt, enemy)
+        towers[i]:update(dt, enemy, offsetX, offsetY)
         for j = #enemy, 1, -1 do
             towers[i]:target(enemy[j])
             if enemy[j]:resolveCollision(towers[i]) then
@@ -74,13 +76,12 @@ function love.update(dt)
 end
 
 function love.draw()
-    local scaleX = love.graphics.getWidth() / windowsWidth
-    local scaleY = love.graphics.getHeight() / windowsHeight
-    love.graphics.push()
-    love.graphics.scale(scaleX, scaleY)
+    if love.graphics.getWidth() ~= 1920 and love.graphics.getHeight() ~= 1080 then
+        love.graphics.translate(offsetX, offsetY)
+    end
 
     love.graphics.setColor(1, 1, 1)
-    love.graphics.line(0, windowsHeight / 2 + player.height, windowsWidth, windowsHeight / 2 + player.height)
+    love.graphics.line(0, windowsHeight / 2 + player.height + 10, windowsWidth, windowsHeight / 2 + player.height + 10)
     love.graphics.setColor(0, 1, 0)
     crystal:draw()
     for i, v in ipairs(enemy) do
@@ -97,14 +98,13 @@ function love.draw()
     end
     love.graphics.setColor(0, 0.5, 1)
     player:draw()
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.print("Points : " .. startingPoint, 10, 10)
     if placingTower then
         local destinationX, destinationY = placeInFrontOfCharacter(player)
         love.graphics.rectangle("line", destinationX, destinationY, 50, 50)
     end
-    
-    love.graphics.pop()
+    love.graphics.origin()
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print("Points : " .. startingPoint, 10, 10)
 end
 
 function love.keypressed(key)
@@ -128,7 +128,7 @@ function love.keypressed(key)
         end
         placeTowerFlag = true
         local towerX, towerY = Tower:placeInFrontOfCharacter(player)
-        if not isPlayerOnEnemy and towerX ~= windowsWidth / 2 and towerX > 100 and not isOccupied(towerX, towerY) then
+        if not isPlayerOnEnemy and towerX > 100 and not isOccupied(towerX, towerY) then
             startingPoint = startingPoint - 100
             placingTower = false
             if towerType == 1 then
@@ -168,8 +168,8 @@ function placeInFrontOfCharacter(player)
     local gridSize = 50
     local offsetX = math.cos(player.facingAngle) * gridSize
     local offsetY = math.sin(player.facingAngle) * gridSize
-    local gridX = math.floor((player.x + player.width / 2 + offsetX) / gridSize) * gridSize
-    local gridY = math.floor((player.y + player.height / 2 + offsetY) / gridSize) * gridSize
+    local gridX = math.floor((player.x + player.width / 2+ offsetX) / gridSize) * gridSize
+    local gridY = math.floor((player.y + player.height / 2+ offsetY) / gridSize) * gridSize
     gridX = math.max(0, math.min(gridX, 1920 - player.width))
     gridY = math.max(0, math.min(gridY, 1080 - player.height))
     return gridX, gridY
