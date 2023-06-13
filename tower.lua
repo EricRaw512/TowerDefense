@@ -9,6 +9,7 @@ function Tower:new(x, y)
     self.bullets = {}
     self.timer = 0
     self.strength = 200
+    self.maxHP = self.hp
 end
 
 function Tower:update(dt, enemy)
@@ -21,6 +22,7 @@ function Tower:update(dt, enemy)
         for j = #enemy, 1, -1 do
             if self:bulletCollision(self.bullets[i], enemy[j]) then
                 enemy[j].hp = enemy[j].hp - 25
+                enemy[j].healthTimer = 0.5
                 table.remove(self.bullets, i)
                 hit = true
                 break

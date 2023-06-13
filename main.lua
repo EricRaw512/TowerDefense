@@ -27,17 +27,25 @@ function love.load()
     towerType = 0
     placeTowerFlag = false
     startingPoint = 500
-    spawnTimer = 5
+    leftSpawnTimer = 5
+    rightSpawnTimer = 10
     timeLimit = 0
 end
 
 function love.update(dt)
-    spawnTimer = spawnTimer - dt
-    if spawnTimer <= timeLimit and not crystal.defeat then
-        spawnTimer = 5
-        table.insert(enemy, Enemy(100, windowsHeight / 2 + 60, 50, 50))
-    end
     player:update(dt)
+    leftSpawnTimer = leftSpawnTimer - dt
+    rightSpawnTimer = rightSpawnTimer - dt
+    if leftSpawnTimer <= timeLimit and not crystal.defeat then
+        leftSpawnTimer = 10
+        local enemyLeftSpawn = 100
+        table.insert(enemy, Enemy(enemyLeftSpawn, windowsHeight / 2 + 60, 50, 50))
+    elseif rightSpawnTimer <= timeLimit and not crystal.defeat then
+        rightSpawnTimer = 10
+        local enemyrightSpawn = 1820
+        table.insert(enemy, Enemy(enemyrightSpawn, windowsHeight / 2 + 60, 50, 50))
+    end
+
     for i = #enemy, 1, -1 do
         enemy[i]:update(dt)
         enemy[i]:resolveCollision(player)
@@ -59,8 +67,10 @@ function love.update(dt)
             end
         end
     end
+
     offsetX = -player.x + 400
     offsetY = -player.y + 300
+
     for i =#towers, 1, -1 do
         towers[i]:update(dt, enemy, offsetX, offsetY)
         for j = #enemy, 1, -1 do
@@ -87,14 +97,17 @@ function love.draw()
     for i, v in ipairs(enemy) do
         love.graphics.setColor(1, 0, 0)
         v:draw()
+        v:drawHealthBar()
     end
     love.graphics.setColor(0.5, 1, 1)
     for i, wall in ipairs(walls) do
         wall:draw()
+        wall:drawHealthBar()
     end
     for i, tower in ipairs(towers) do
         tower:drawTower()
         tower:drawBullet()
+        tower:drawHealthBar()
     end
     love.graphics.setColor(0, 0.5, 1)
     player:draw()
@@ -128,7 +141,7 @@ function love.keypressed(key)
         end
         placeTowerFlag = true
         local towerX, towerY = Tower:placeInFrontOfCharacter(player)
-        if not isPlayerOnEnemy and towerX > 100 and not isOccupied(towerX, towerY) then
+        if not isPlayerOnEnemy and towerX > 100 and towerX < 1800 and not isOccupied(towerX, towerY) then
             startingPoint = startingPoint - 100
             placingTower = false
             if towerType == 1 then
@@ -143,11 +156,13 @@ end
 
 function isOccupied(gridX, gridY)
     local gridSize = 50
+    
     for i, t in ipairs(towers) do
         if t.x == gridX and t.y == gridY then
             return true
         end
     end
+
     for i, w in ipairs(walls) do
         if w.x == gridX and w.y == gridY then
             return true
@@ -161,6 +176,11 @@ function isOccupied(gridX, gridY)
             return true
         end
     end
+
+    if gridX == 950 then
+        return true
+    end
+
     return false    
 end
 

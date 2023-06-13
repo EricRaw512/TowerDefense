@@ -9,9 +9,14 @@ function Entity:new(x, y, width, height)
     self.height = height
     self.last = { x = self.x, y = self.y}
     self.strength = 0
+    self.healthTimer = 0
+    self.maxHP = 0
 end
 
 function Entity:update(dt)
+    if self.healthTimer > 0 then
+        self.healthTimer = self.healthTimer - dt
+    end
     self.last.x = self.x
     self.last.y = self.y
 end
@@ -66,5 +71,12 @@ function Entity:collide(e, direction)
         self.gravity = 0
     elseif direction == "top" then
         self.y = e.y + e.height
+    end
+end
+
+function Entity:drawHealthBar()
+    if self.healthTimer > 0 then
+        local hpPercentange = self.hp / self.maxHP
+        love.graphics.rectangle("fill", self.x, self.y - 20, hpPercentange * self.width, 10)
     end
 end
