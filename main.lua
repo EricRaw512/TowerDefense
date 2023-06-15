@@ -10,6 +10,7 @@ function love.load()
     require "crystal"
     require "tower"
     require "wall"
+    require "goblin"
 
     love.window.setMode(800, 600, {resizable=true, vsync=false})
     windowsWidth = 1920
@@ -27,23 +28,32 @@ function love.load()
     towerType = 0
     placeTowerFlag = false
     startingPoint = 500
-    leftSpawnTimer = 5
-    rightSpawnTimer = 10
+    leftSpawnTimer = 0
+    rightSpawnTimer = 5
     timeLimit = 0
+    wave = 1
+    wavesDelay = 60
+    enemyNum = 0
 end
 
 function love.update(dt)
     player:update(dt)
-    leftSpawnTimer = leftSpawnTimer - dt
-    rightSpawnTimer = rightSpawnTimer - dt
-    if leftSpawnTimer <= timeLimit and not crystal.defeat then
-        leftSpawnTimer = 10
-        local enemyLeftSpawn = 100
-        table.insert(enemy, Enemy(enemyLeftSpawn, windowsHeight / 2 + 60, 50, 50))
-    elseif rightSpawnTimer <= timeLimit and not crystal.defeat then
-        rightSpawnTimer = 10
-        local enemyrightSpawn = 1820
-        table.insert(enemy, Enemy(enemyrightSpawn, windowsHeight / 2 + 60, 50, 50))
+    if wavesDelay > 0 then
+        wavesDelay = wavesDelay - dt
+    else
+        leftSpawnTimer = leftSpawnTimer - dt
+        rightSpawnTimer = rightSpawnTimer - dt
+        if leftSpawnTimer <= timeLimit and not crystal.defeat then
+            leftSpawnTimer = 10
+            local enemyLeftSpawn = 100
+            table.insert(enemy, Goblin(enemyLeftSpawn, windowsHeight / 2 + 60, wave))
+            enemyNum = enemyNum + Goblin.waves[wave].enemyNum
+        elseif rightSpawnTimer <= timeLimit and not crystal.defeat then
+            rightSpawnTimer = 10
+            local enemyrightSpawn = 1820
+            table.insert(enemy, Goblin(enemyrightSpawn, windowsHeight / 2 + 60, wave))
+            enemyNum = enemyNum + Goblin.waves[wave].enemyNum
+        end
     end
 
     for i = #enemy, 1, -1 do
@@ -83,6 +93,14 @@ function love.update(dt)
             table.remove(towers, i)
         end
     end
+
+    if #enemy == 0 and wavesDelay < 0 then
+        wavesDelay = 60
+        wave = wave + 1
+        if wave > 3 then
+            wave = 3
+        end
+    end
 end
 
 function love.draw()
@@ -118,6 +136,11 @@ function love.draw()
     love.graphics.origin()
     love.graphics.setColor(1, 1, 1)
     love.graphics.print("Points : " .. startingPoint, 10, 10)
+    if wavesDelay > 0 then
+        love.graphics.print("Next Waves In", love.graphics.getWidth() / 2 - 50, 10)
+        love.graphics.print(string.format("%.0f", wavesDelay), love.graphics.getWidth() / 2 - 15, 30)
+        love.graphics.print("Press F1 to start the round", love.graphics.getWidth() / 2 - 80, 50)
+    end
 end
 
 function love.keypressed(key)
@@ -150,6 +173,8 @@ function love.keypressed(key)
                 table.insert(walls, Wall(towerX, towerY))                 
             end
         end
+    elseif key == "f1" then
+        wavesDelay = 0
     end
     placeTowerFlag = false
 end

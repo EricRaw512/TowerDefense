@@ -2,16 +2,16 @@
 
 Enemy = Entity:extend()
 
-function Enemy:new(x, y, hp, damage)
-    Enemy.super.new(self, x, y, hp, damage)
-    self.speed = love.math.random(50, 150)
+function Enemy:new(x, y)
+    Enemy.super.new(self, x, y)
+    self.speed = 0
     self.strength = 150
     self.time = 0
-    self.hp = love.math.random(50, 200)
-    self.damage = damage
-    self.width = 50
-    self.height = 50
+    self.attackDelay = 3
+    self.hp = 0
     self.maxHP = self.hp
+    self.width = 0
+    self.height = 0
 end
 
 function Enemy:update(dt)
