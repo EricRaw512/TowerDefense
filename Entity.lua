@@ -45,20 +45,40 @@ function Entity:resolveCollision(e)
     if self:checkCollision(e) then
         if self:wasVertical(e) then
             if self.x + self.width / 2 < e.x + e.width / 2 then
-                self:collide(e, "right")
+                local a = self:checkResolve(e, "right")
+                local b = e:checkResolve(self, "left")
+                if a and b then
+                    self:collide(e, "right")
+                end
             else
-                self:collide(e, "left")
+                local a = self:checkResolve(e, "left")
+                local b = e:checkResolve(self, "right")
+                if a and b then
+                    self:collide(e, "left")
+                end
             end
         elseif self:wasHorizontal(e) then 
             if self.y + self.height / 2 < e.y + e.height / 2 then
-                self:collide(e, "bottom")
+                local a = self:checkResolve(e, "bottom")
+                local b = e:checkResolve(self, "top")
+                if a and b then
+                    self:collide(e, "bottom")
+                end
             else
-                self:collide(e, "top")
+                local a = self:checkResolve(e, "bottom")
+                local b = e:checkResolve(self, "top")
+                if a and b then
+                    self:collide(e, "top")
+                end
             end
         end
         return true
     end
     return false
+end
+
+function Entity:checkResolve(e, direction)
+    return true
 end
 
 function Entity:collide(e, direction)

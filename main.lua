@@ -24,6 +24,7 @@ function love.load()
     require "tower"
     require "wall"
     require "goblin"
+    require "platform"
 
     love.window.setMode(800, 600, {resizable=true, vsync=false})
 
@@ -32,9 +33,10 @@ function love.load()
     player = Player(windowsWidth / 2, windowsHeight / 2 + 10, 50, 100)
     towers = {}
     walls = {}
+    platform = {}
 
-    offsetX = -player.x + 400
-    offsetY = -player.y + 300
+    offsetX = -player.x + love.graphics.getWidth() / 2
+    offsetY = -player.y + love.graphics.getHeight() / 2
 end
 
 function love.update(dt)
@@ -80,11 +82,21 @@ function love.update(dt)
                     table.remove(walls, j)
                 end
             end
+            for j = #platform, 1, -1 do
+                if enemy[i]:resolveCollision(platform[j]) then
+                    enemy[i]:attack(platform[j], dt)
+                end
+                if platform[j].hp <= 0 then
+                    table.remove(platform, j)
+                end
+            end
         end
     end
 
-    offsetX = -player.x + 400
-    offsetY = -player.y + 300
+
+
+    offsetX = -player.x + love.graphics.getWidth() / 2
+    offsetY = -player.y + love.graphics.getHeight() / 2
 
     for i =#towers, 1, -1 do
         towers[i]:update(dt, enemy)
@@ -135,6 +147,10 @@ function love.draw()
     end
     love.graphics.setColor(0, 0.5, 1)
     player:draw()
+    for i, v in ipairs(platform) do
+        v:resolveCollision(player)
+        v:draw()
+    end
     if placingTower then
         local destinationX, destinationY = placeInFrontOfCharacter(player)
         love.graphics.rectangle("line", destinationX, destinationY, 50, 50)
@@ -161,6 +177,9 @@ function love.keypressed(key)
     elseif key == '2' and startingPoint >= 100 then
         placingTower = true
         towerType = 2
+    elseif key == '3' and startingPoint >= 500 then
+        placingTower = true
+        towerType = 3
     elseif key == "space" and not placeTowerFlag and player.gravity == 0 and placingTower then
         local isPlayerOnEnemy = false
         for i, e in ipairs(enemy) do
@@ -194,7 +213,9 @@ function placeTower(towerX, towerY, towerType)
     if towerType == 1 then
         table.insert(towers, Tower(towerX, towerY))
     elseif towerType == 2 then
-        table.insert(walls, Wall(towerX, towerY))                 
+        table.insert(walls, Wall(towerX, towerY))
+    elseif towerType == 3 then
+        table.insert(platform, Platform(towerX, towerY))
     end
 end
 
