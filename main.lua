@@ -2,6 +2,19 @@ if arg[2] == "debug" then
     require("lldebugger").start()
 end
 
+local windowsWidth = 1920
+local windowsHeight = 1080
+local wave = 1
+local leftSpawnTimer = 0
+local rightSpawnTimer = 5
+local timeLimit = 0
+local placingTower = false
+local towerType = 0
+local placeTowerFlag = false
+local startingPoint = 500
+local wavesDelay = 60
+local enemyNum = 0
+local spawn = true
 function love.load()
     Objects = require "classic"
     require "entity"
@@ -13,8 +26,6 @@ function love.load()
     require "goblin"
 
     love.window.setMode(800, 600, {resizable=true, vsync=false})
-    windowsWidth = 1920
-    windowsHeight = 1080
 
     enemy = {}
     crystal = Crystal(windowsWidth / 2 - 10, windowsHeight / 2 + 10, 50, 100)
@@ -24,17 +35,6 @@ function love.load()
 
     offsetX = -player.x + 400
     offsetY = -player.y + 300
-    placingTower = false
-    towerType = 0
-    placeTowerFlag = false
-    startingPoint = 500
-    leftSpawnTimer = 0
-    rightSpawnTimer = 5
-    timeLimit = 0
-    wave = 1
-    wavesDelay = 10
-    enemyNum = 0
-    spawn = true
 end
 
 function love.update(dt)
@@ -87,7 +87,7 @@ function love.update(dt)
     offsetY = -player.y + 300
 
     for i =#towers, 1, -1 do
-        towers[i]:update(dt, enemy, offsetX, offsetY)
+        towers[i]:update(dt, enemy)
         for j = #enemy, 1, -1 do
             towers[i]:target(enemy[j])
             if enemy[j]:resolveCollision(towers[i]) then
