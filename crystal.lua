@@ -11,9 +11,6 @@ function Crystal:draw()
     local hpPercentange = self.hp / 1000
     love.graphics.rectangle("fill", self.x, self.y - 20, hpPercentange * self.width, 10)
     love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
-    if self.defeat then
-        love.graphics.print("YOU LOSE", windowsHeight / 2, windowsWidth / 2)
-    end
 end
 
 function Crystal:update(dt)

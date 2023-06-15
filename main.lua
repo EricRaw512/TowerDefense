@@ -176,11 +176,7 @@ function love.keypressed(key)
         if not isPlayerOnEnemy and towerX > 100 and towerX < 1800 and not isOccupied(towerX, towerY) then
             startingPoint = startingPoint - 100
             placingTower = false
-            if towerType == 1 then
-                table.insert(towers, Tower(towerX, towerY))
-            elseif towerType == 2 then
-                table.insert(walls, Wall(towerX, towerY))                 
-            end
+            placeTower(towerX, towerY, towerType)
         end
     elseif key == "f1" then
         wavesDelay = 0
@@ -192,6 +188,14 @@ function spawnEnemy(x)
     enemyNum = enemyNum - 1
     table.insert(enemy, Goblin(x, windowsHeight / 2 + 60, wave))
     return love.math.random(2, 6)
+end
+
+function placeTower(towerX, towerY, towerType)
+    if towerType == 1 then
+        table.insert(towers, Tower(towerX, towerY))
+    elseif towerType == 2 then
+        table.insert(walls, Wall(towerX, towerY))                 
+    end
 end
 
 function isOccupied(gridX, gridY)
