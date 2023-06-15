@@ -32,34 +32,39 @@ function love.load()
     rightSpawnTimer = 5
     timeLimit = 0
     wave = 1
-    wavesDelay = 60
+    wavesDelay = 10
     enemyNum = 0
+    spawn = true
 end
 
 function love.update(dt)
     player:update(dt)
+
     if wavesDelay > 0 then
         wavesDelay = wavesDelay - dt
-    else
+    elseif wavesDelay <= 0 then
+        if spawn then
+            enemyNum = Goblin.waves[wave].enemyNum * 2
+            spawn = false
+        end
         leftSpawnTimer = leftSpawnTimer - dt
         rightSpawnTimer = rightSpawnTimer - dt
-        if leftSpawnTimer <= timeLimit and not crystal.defeat then
-            leftSpawnTimer = 10
-            local enemyLeftSpawn = 100
-            table.insert(enemy, Goblin(enemyLeftSpawn, windowsHeight / 2 + 60, wave))
-            enemyNum = enemyNum + Goblin.waves[wave].enemyNum
-        elseif rightSpawnTimer <= timeLimit and not crystal.defeat then
-            rightSpawnTimer = 10
-            local enemyrightSpawn = 1820
-            table.insert(enemy, Goblin(enemyrightSpawn, windowsHeight / 2 + 60, wave))
-            enemyNum = enemyNum + Goblin.waves[wave].enemyNum
+        if enemyNum > 0 then
+            if  leftSpawnTimer <= timeLimit then
+                leftSpawnTimer = spawnEnemy(100)
+            end
+    
+            if rightSpawnTimer <= timeLimit then
+                rightSpawnTimer = spawnEnemy(1810)
+            end
         end
     end
 
     for i = #enemy, 1, -1 do
         enemy[i]:update(dt)
         enemy[i]:resolveCollision(player)
-        if enemy[i].hp < 0 then
+        if enemy[i].hp <= 0 then
+            enemyNum = enemyNum - 1
             table.remove(enemy, i)
             startingPoint = startingPoint + 50
         else 
@@ -94,12 +99,13 @@ function love.update(dt)
         end
     end
 
-    if #enemy == 0 and wavesDelay < 0 then
+    if not crystal.defeat and #enemy == 0 and wavesDelay <= 0 and enemyNum <= 0 and not spawn then
         wavesDelay = 60
         wave = wave + 1
-        if wave > 3 then
-            wave = 3
+        if wave > 4 then
+            wave = 4
         end
+        spawn = true
     end
 end
 
@@ -137,9 +143,12 @@ function love.draw()
     love.graphics.setColor(1, 1, 1)
     love.graphics.print("Points : " .. startingPoint, 10, 10)
     if wavesDelay > 0 then
-        love.graphics.print("Next Waves In", love.graphics.getWidth() / 2 - 50, 10)
+        love.graphics.print("Wave "..wave.." Start In", love.graphics.getWidth() / 2 - 50, 10)
         love.graphics.print(string.format("%.0f", wavesDelay), love.graphics.getWidth() / 2 - 15, 30)
         love.graphics.print("Press F1 to start the round", love.graphics.getWidth() / 2 - 80, 50)
+    end
+    if crystal.defeat then
+        love.graphics.print("YOU LOSE", love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
     end
 end
 
@@ -177,6 +186,12 @@ function love.keypressed(key)
         wavesDelay = 0
     end
     placeTowerFlag = false
+end
+
+function spawnEnemy(x)
+    enemyNum = enemyNum - 1
+    table.insert(enemy, Goblin(x, windowsHeight / 2 + 60, wave))
+    return love.math.random(2, 6)
 end
 
 function isOccupied(gridX, gridY)
