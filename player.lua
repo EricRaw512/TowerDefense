@@ -52,3 +52,14 @@ function Player:collide(e, direction)
         self.canJump = true
     end
 end
+
+function Player:checkResolve(e, direction)
+    if e:is(Platform) then
+        if direction == "bottom" then
+            return true
+        else
+            return false
+        end
+    end
+    return true
+end
