@@ -25,7 +25,7 @@ function Player:update(dt)
 
     self.gravity = self.gravity + self.weight * dt
     self.y = self.y + self.gravity * dt
-    local windowsHeight = 1080 / 2 + 10
+    local windowsHeight = 1080 / 2 + 60
     if self.y > windowsHeight then
         self.gravity = 0
         self.y = windowsHeight
@@ -41,7 +41,7 @@ end
 
 function Player:jump()
     if self.canJump then
-        self.gravity = -300
+        self.gravity = -250
         self.canJump = false
     end
 end

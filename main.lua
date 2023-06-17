@@ -11,10 +11,12 @@ local timeLimit = 0
 local placingTower = false
 local towerType = 0
 local placeTowerFlag = false
-local startingPoint = 500
+local startingPoint = 2500
 local wavesDelay = 60
 local enemyNum = 0
 local spawn = true
+local gridSize = 50
+
 function love.load()
     Objects = require "classic"
     require "entity"
@@ -30,7 +32,7 @@ function love.load()
 
     enemy = {}
     crystal = Crystal(windowsWidth / 2 - 10, windowsHeight / 2 + 10, 50, 100)
-    player = Player(windowsWidth / 2, windowsHeight / 2 + 10, 50, 100)
+    player = Player(windowsWidth / 2, windowsHeight / 2 + 60, 50, 50)
     towers = {}
     walls = {}
     platform = {}
@@ -87,13 +89,12 @@ function love.update(dt)
                     enemy[i]:attack(platform[j], dt)
                 end
                 if platform[j].hp <= 0 then
+                    removeOnPlatform(j, platform[j].towerType)
                     table.remove(platform, j)
                 end
             end
         end
     end
-
-
 
     offsetX = -player.x + love.graphics.getWidth() / 2
     offsetY = -player.y + love.graphics.getHeight() / 2
@@ -127,7 +128,7 @@ function love.draw()
     end
 
     love.graphics.setColor(1, 1, 1)
-    love.graphics.line(0, windowsHeight / 2 + player.height + 10, windowsWidth, windowsHeight / 2 + player.height + 10)
+    love.graphics.line(0, windowsHeight / 2 + player.height + 60 , windowsWidth, windowsHeight / 2 + player.height + 60)
     love.graphics.setColor(0, 1, 0)
     crystal:draw()
     for i, v in ipairs(enemy) do
@@ -145,12 +146,14 @@ function love.draw()
         tower:drawBullet()
         tower:drawHealthBar()
     end
+    for i, plat in ipairs(platform) do
+        love.graphics.setColor(0.5, 0., 0.5)
+        plat:resolveCollision(player)
+        plat:draw()
+        plat:drawHealthBar()
+    end
     love.graphics.setColor(0, 0.5, 1)
     player:draw()
-    for i, v in ipairs(platform) do
-        v:resolveCollision(player)
-        v:draw()
-    end
     if placingTower then
         local destinationX, destinationY = placeInFrontOfCharacter(player)
         love.graphics.rectangle("line", destinationX, destinationY, 50, 50)
@@ -192,10 +195,8 @@ function love.keypressed(key)
         end
         placeTowerFlag = true
         local towerX, towerY = Tower:placeInFrontOfCharacter(player)
-        if not isPlayerOnEnemy and towerX > 100 and towerX < 1800 and not isOccupied(towerX, towerY) then
-            startingPoint = startingPoint - 100
-            placingTower = false
-            placeTower(towerX, towerY, towerType)
+        if not isPlayerOnEnemy and towerX > 100 and towerX < 1800 and not isOccupied(towerX, towerY, towerType) then
+            placingTower = placeTower(towerX, towerY, towerType)
         end
     elseif key == "f1" then
         wavesDelay = 0
@@ -211,26 +212,82 @@ end
 
 function placeTower(towerX, towerY, towerType)
     if towerType == 1 then
+        if towerY < 600 then
+            for i, v in ipairs(platform) do
+                if v.y == towerY + gridSize and v.x == towerX then
+                    v.towerType = towerType
+                    startingPoint = startingPoint - 100
+                    table.insert(towers, Tower(towerX, towerY))
+                    return false
+                end
+            end
+            return true
+        end
+        startingPoint = startingPoint - 100
         table.insert(towers, Tower(towerX, towerY))
+        return false
     elseif towerType == 2 then
+        if towerY < 600 then
+            for i, v in ipairs(platform) do
+                if v.y == towerY + gridSize and v.x == towerX then
+                    v.towerType = towerType
+                    startingPoint = startingPoint - 100
+                    table.insert(walls, Wall(towerX, towerY))
+                    return false
+                end
+            end
+            return true
+        end
+        startingPoint = startingPoint - 100
         table.insert(walls, Wall(towerX, towerY))
+        return false
     elseif towerType == 3 then
-        table.insert(platform, Platform(towerX, towerY))
+        startingPoint = startingPoint - 500
+        table.insert(platform, Platform(towerX, towerY, 0))
+        return false
+    end
+    return true
+end
+
+function removeOnPlatform(index, towerType)
+    print(towerType)
+    if towerType == 1 then
+        for i, tower in ipairs(towers) do
+            print(tower.x.. " " ..platform[index].x)
+            print(tower.y.. " " ..platform[index].y)
+            if tower.x == platform[index].x and tower.y == platform[index].y - 50 then
+                table.remove(towers, i)
+            end
+        end
+    elseif towerType == 2 then
+        for i, tower in ipairs(walls) do
+            if tower.x == platform[index].x and tower.y == platform[index] - 50 then
+                table.remove(walls, i)
+            end
+        end
     end
 end
 
-function isOccupied(gridX, gridY)
-    local gridSize = 50
+function isOccupied(gridX, gridY, towerType)
+    if towerType ~= 3 then
+        for i, t in ipairs(towers) do
+            if t.x == gridX and t.y == gridY then
+                return true
+            end
+        end
     
-    for i, t in ipairs(towers) do
-        if t.x == gridX and t.y == gridY then
-            return true
+        for i, w in ipairs(walls) do
+            if w.x == gridX and w.y == gridY then
+                return true
+            end
         end
     end
 
-    for i, w in ipairs(walls) do
-        if w.x == gridX and w.y == gridY then
-            return true
+    if towerType == 3 then
+        for i, w in ipairs(platform) do
+            if w.x == gridX and w.y == gridY then
+                return true
+            end
         end
     end
 
@@ -250,7 +307,6 @@ function isOccupied(gridX, gridY)
 end
 
 function placeInFrontOfCharacter(player)
-    local gridSize = 50
     local offsetX = math.cos(player.facingAngle) * gridSize
     local offsetY = math.sin(player.facingAngle) * gridSize
     local gridX = math.floor((player.x + player.width / 2+ offsetX) / gridSize) * gridSize

@@ -16,7 +16,7 @@ function Tower:update(dt, enemy)
     self.timer = self.timer - dt
     local bulletSpeed = 250
     for i = #self.bullets, 1, -1 do
-        self.bullets[1].x = (self.bullets[1].x + math.cos(self.bullets[1].angle) * (bulletSpeed * dt))
+        self.bullets[i].x = (self.bullets[i].x + math.cos(self.bullets[i].angle) * (bulletSpeed * dt))
         self.bullets[i].y = (self.bullets[i].y + math.sin(self.bullets[i].angle) * (bulletSpeed * dt))
         local hit = false
         for j = #enemy, 1, -1 do

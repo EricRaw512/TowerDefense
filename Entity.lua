@@ -65,9 +65,8 @@ function Entity:resolveCollision(e)
                     self:collide(e, "bottom")
                 end
             else
-                local a = self:checkResolve(e, "bottom")
                 local b = e:checkResolve(self, "top")
-                if a and b then
+                if a and  b then
                     self:collide(e, "top")
                 end
             end
