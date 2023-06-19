@@ -258,11 +258,14 @@ end
 
 function isOccupied(gridX, gridY, towerType)
     if towerType ~= 3 then
-        for i, tower in ipairs(towers) do
-            for j, t in ipairs(tower) do
-                if t.x == gridX and t.y == gridY then
-                    return true
-                end
+        for i, t in ipairs(towers.archerTower) do
+            if t.x == gridX and t.y == gridY then
+                return true
+            end
+        end
+        for i, t in ipairs(towers.walls) do
+            if t.x == gridX and t.y == gridY then
+                return true
             end
         end
     end
