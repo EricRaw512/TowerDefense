@@ -32,8 +32,14 @@ end
 function Enemy:attack(e, dt)
     self.time = self.time - dt
     if self.time <= 0 then
-        self.time = 3
-        e.hp = e.hp - self.damage
-        e.healthTimer = 0.5
+        if e:is(Crystal) then
+            self.time = 3
+            e.hp = e.hp - self.damage
+            e.healthTimer = 0.5
+        elseif self.y == e.y then
+            self.time = 3
+            e.hp = e.hp - self.damage
+            e.healthTimer = 0.5
+        end
     end
 end
