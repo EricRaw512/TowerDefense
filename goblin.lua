@@ -5,6 +5,10 @@ Goblin.waves = {
     {enemyHealth = 125, enemyNum = 10},
     {enemyHealth = 150, enemyNum = 15},
     {enemyHealth = 150, enemyNum = 25},
+    {enemyHealth = 200, enemyNum = 25},
+    {enemyHealth = 250, enemyNum = 40},
+    {enemyHealth = 350, enemyNum = 50},
+    {enemyHealth = 500, enemyNum = 100},
 }
 
 function Goblin:new(x, y, index)

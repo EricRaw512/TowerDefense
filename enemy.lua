@@ -37,9 +37,12 @@ function Enemy:attack(e, dt)
             e.hp = e.hp - self.damage
             e.healthTimer = 0.5
         elseif self.y == e.y then
-            self.time = 3
-            e.hp = e.hp - self.damage
-            e.healthTimer = 0.5
+            if self.speed > 0 and self.x < e.x
+            or self.speed < 0 and self.x > e.x then
+                self.time = 3
+                e.hp = e.hp - self.damage
+                e.healthTimer = 0.5
+            end
         end
     end
 end

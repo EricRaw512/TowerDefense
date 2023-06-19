@@ -11,11 +11,12 @@ local timeLimit = 0
 local placingTower = false
 local towerType = 0
 local placeTowerFlag = false
-local startingPoint = 2500
+local startingPoint = 500
 local wavesDelay = 60
 local enemyNum = 0
 local spawn = true
 local gridSize = 50
+local deleteGrid = false
 
 function love.load()
     Objects = require "classic"
@@ -116,8 +117,8 @@ function love.update(dt)
     if not crystal.defeat and #enemy == 0 and wavesDelay <= 0 and enemyNum <= 0 and not spawn then
         wavesDelay = 60
         wave = wave + 1
-        if wave > 4 then
-            wave = 4
+        if wave > 8 then
+            wave = 8
         end
         spawn = true
     end
@@ -132,11 +133,6 @@ function love.draw()
     love.graphics.line(0, windowsHeight / 2 + player.height + 60 , windowsWidth, windowsHeight / 2 + player.height + 60)
     love.graphics.setColor(0, 1, 0)
     crystal:draw()
-    for i, v in ipairs(enemy) do
-        love.graphics.setColor(1, 0, 0)
-        v:draw()
-        v:drawHealthBar()
-    end
     love.graphics.setColor(0.5, 1, 1)
     for i, wall in ipairs(towers.walls) do
         wall:draw()
@@ -152,6 +148,11 @@ function love.draw()
         plat:resolveCollision(player)
         plat:draw()
         plat:drawHealthBar()
+    end
+    for i, v in ipairs(enemy) do
+        love.graphics.setColor(1, 0, 0)
+        v:draw()
+        v:drawHealthBar()
     end
     love.graphics.setColor(0, 0.5, 1)
     player:draw()
@@ -200,24 +201,27 @@ function love.keypressed(key)
     placeTowerFlag = false
 end
 
+-- spawn the enemy at left or right 
 function spawnEnemy(x)
     enemyNum = enemyNum - 1
     table.insert(enemy, Goblin(x, windowsHeight / 2 + 60, wave))
     return love.math.random(2, 6)
 end
 
+--placing tower at platform or not
 function placeTower(towerX, towerY, towerType)
     if towerType ~= 3 then
         if towerY < 600 then
             for i, v in ipairs(platform) do
                 if v.y == towerY + gridSize and v.x == towerX then
-                    startingPoint = startingPoint - 100
+                    startingPoint = startingPoint - 200
                     towerInsert(towerType, towerX, towerY)
                 end
             end
+        else
+            startingPoint = startingPoint - 100
+            towerInsert(towerType, towerX, towerY)
         end
-        startingPoint = startingPoint - 100
-        towerInsert(towerType, towerX, towerY)
     else
         startingPoint = startingPoint - 500
         table.insert(platform, Platform(towerX, towerY, 0))
@@ -225,6 +229,7 @@ function placeTower(towerX, towerY, towerType)
     return false
 end
 
+--remove tower if there are on a platform
 function removeOnPlatform(index)
     local towersToRemove = {}  -- Store the indices of towers to be removed
 
@@ -256,6 +261,7 @@ function removeOnPlatform(index)
     end
 end
 
+--check if the grid is occupied
 function isOccupied(gridX, gridY, towerType)
     if towerType ~= 3 then
         for i, t in ipairs(towers.archerTower) do
@@ -293,6 +299,7 @@ function isOccupied(gridX, gridY, towerType)
     return false    
 end
 
+-- place in front of player per grid
 function placeInFrontOfCharacter(player)
     local offsetX = math.cos(player.facingAngle) * gridSize
     local offsetY = math.sin(player.facingAngle) * gridSize
@@ -303,6 +310,7 @@ function placeInFrontOfCharacter(player)
     return gridX, gridY
 end
 
+-- go down the platform with down button
 function goDownplatform()
     for i ,v in ipairs(platform) do
         if player.x + player.width >= v.x
@@ -313,6 +321,7 @@ function goDownplatform()
     end
 end
 
+-- check if player is on enemy
 function playerOnEnemy()
     for i, e in ipairs(enemy) do
         if player.y + player.height <= e.y and
@@ -324,11 +333,31 @@ function playerOnEnemy()
     return false
 end
 
+-- insert tower into corresponding table
 function towerInsert(towerType, towerX, towerY)
     if towerType == 1 then
         table.insert(towers.archerTower, Tower(towerX, towerY))
     elseif towerType == 2 then
         table.insert(towers.walls, Wall(towerX, towerY))
+    end
+end
+
+--refund the tower based on the hp
+function deleteTower(gridX, gridY)
+    for i, t in ipairs(towers.archerTower) do
+        if t.x == gridX and t.y == gridY then
+            return true
+        end
+    end
+    for i, t in ipairs(towers.walls) do
+        if t.x == gridX and t.y == gridY then
+            return true
+        end
+    end
+    for i, t in ipairs(platform) do
+        if t.x == gridX and t.y == gridY then
+            return true
+        end
     end
 end
 
