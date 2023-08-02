@@ -33,6 +33,9 @@ function love.load()
     background = love.graphics.newImage("imageAssets/background/back2.png")
     tiles= love.graphics.newImage("imageAssets/background/Tile_02.png")
     dirt= love.graphics.newImage("imageAssets/background/Tile_12.png")
+    tree2 = love.graphics.newImage("imageAssets/background/2.png")
+    tree3 = love.graphics.newImage("imageAssets/background/3.png")
+    rock = love.graphics.newImage("imageAssets/background/rock1.png")
 
     enemy = {}
     crystal = Crystal(windowsWidth / 2 - 10, windowsHeight / 2 + 10, 50, 100)
@@ -133,25 +136,41 @@ function love.draw()
     end
 
     love.graphics.draw(background, -400, 0, 0, (windowsWidth + 750) / background:getWidth(), (windowsHeight - 225) / background:getHeight())
+    for i, v in ipairs(enemy) do
+        love.graphics.setColor(1, 0, 0)
+        v:draw()
+        v:drawHealthBar()
+    end
+    love.graphics.setColor(0, 1, 0)
+    crystal:draw()
+    love.graphics.setColor(0, 0.5, 1)
+    player:draw()
+
+    love.graphics.setColor(1, 1, 1)
     local tilesWidth = tiles:getWidth()
     local tilesHeight = tiles:getHeight()
+    local floorHeight = windowsHeight / 2 + 110
+    local floorHeightTree = -300
+    local treeExpand = 3
+    local treeHeight = (windowsHeight - 120) / tree2:getHeight()
     local columns = math.ceil(windowsWidth / tilesWidth) + 10
     local rows = math.ceil(windowsHeight / tilesHeight)
-
+    love.graphics.draw(tree2, -450, floorHeightTree, 0, treeExpand, treeHeight)
+    love.graphics.draw(tree3, -400, floorHeightTree, 0, treeExpand, treeHeight)
+    love.graphics.draw(tree2, -50, floorHeightTree, 0, treeExpand, treeHeight)
+    love.graphics.draw(tree2, windowsWidth - 250, floorHeightTree, 0, treeExpand, treeHeight)
+    love.graphics.draw(tree3, windowsWidth - 200, floorHeightTree, 0, treeExpand, treeHeight)
+    love.graphics.draw(tree2, windowsWidth - 50, floorHeightTree, 0, -treeExpand, treeHeight)
+    love.graphics.draw(rock, windowsWidth, floorHeight - rock:getHeight())
+    love.graphics.draw(rock, 0, floorHeight - rock:getHeight(), 0, -1, 1)
     for column = -13, columns do
         local x = column * tilesWidth
-        local y = windowsHeight / 2 + 110
-        love.graphics.draw(tiles, x, y)
+        love.graphics.draw(tiles, x, floorHeight)
         for row = 1, rows do
-            
-            love.graphics.draw(dirt, x, y + (row * tilesHeight))
+            love.graphics.draw(dirt, x, floorHeight + (row * tilesHeight))
         end
     end   
     
-    love.graphics.draw(tiles, 0, windowsHeight / 2 + player.height + 60 )
-    --love.graphics.line(0, windowsHeight / 2 + player.height + 60 , windowsWidth, windowsHeight / 2 + player.height + 60)
-    love.graphics.setColor(0, 1, 0)
-    crystal:draw()
     love.graphics.setColor(0.5, 1, 1)
     for i, wall in ipairs(towers.walls) do
         wall:draw()
@@ -168,13 +187,7 @@ function love.draw()
         plat:draw()
         plat:drawHealthBar()
     end
-    for i, v in ipairs(enemy) do
-        love.graphics.setColor(1, 0, 0)
-        v:draw()
-        v:drawHealthBar()
-    end
-    love.graphics.setColor(0, 0.5, 1)
-    player:draw()
+
     if placingTower then
         local destinationX, destinationY = placeInFrontOfCharacter(player)
         love.graphics.rectangle("line", destinationX, destinationY, 50, 50)
