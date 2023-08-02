@@ -64,11 +64,6 @@ function Entity:resolveCollision(e)
                 if a and b then
                     self:collide(e, "bottom")
                 end
-            else
-                local b = e:checkResolve(self, "top")
-                if a and b then
-                    self:collide(e, "top")
-                end
             end
         end
         return true
@@ -88,8 +83,6 @@ function Entity:collide(e, direction)
     elseif direction == "bottom" then
         self.y = e.y - self.height
         self.gravity = 0
-    elseif direction == "top" then
-        self.y = e.y + e.height
     end
 end
 

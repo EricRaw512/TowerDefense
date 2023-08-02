@@ -30,6 +30,9 @@ function love.load()
     require "platform"
 
     love.window.setMode(800, 600, {resizable=true, vsync=false})
+    background = love.graphics.newImage("imageAssets/background/back2.png")
+    tiles= love.graphics.newImage("imageAssets/background/Tile_02.png")
+    dirt= love.graphics.newImage("imageAssets/background/Tile_12.png")
 
     enemy = {}
     crystal = Crystal(windowsWidth / 2 - 10, windowsHeight / 2 + 10, 50, 100)
@@ -129,8 +132,24 @@ function love.draw()
         love.graphics.translate(offsetX, offsetY)
     end
 
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.line(0, windowsHeight / 2 + player.height + 60 , windowsWidth, windowsHeight / 2 + player.height + 60)
+    love.graphics.draw(background, -400, 0, 0, (windowsWidth + 750) / background:getWidth(), (windowsHeight - 225) / background:getHeight())
+    local tilesWidth = tiles:getWidth()
+    local tilesHeight = tiles:getHeight()
+    local columns = math.ceil(windowsWidth / tilesWidth) + 10
+    local rows = math.ceil(windowsHeight / tilesHeight)
+
+    for column = -13, columns do
+        local x = column * tilesWidth
+        local y = windowsHeight / 2 + 110
+        love.graphics.draw(tiles, x, y)
+        for row = 1, rows do
+            
+            love.graphics.draw(dirt, x, y + (row * tilesHeight))
+        end
+    end   
+    
+    love.graphics.draw(tiles, 0, windowsHeight / 2 + player.height + 60 )
+    --love.graphics.line(0, windowsHeight / 2 + player.height + 60 , windowsWidth, windowsHeight / 2 + player.height + 60)
     love.graphics.setColor(0, 1, 0)
     crystal:draw()
     love.graphics.setColor(0.5, 1, 1)
