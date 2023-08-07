@@ -12,10 +12,13 @@ function Enemy:new(x, y)
     self.maxHP = self.hp
     self.width = 0
     self.height = 0
+    self.walkFrame = 1
 end
 
 function Enemy:update(dt)
     Enemy.super.update(self, dt)
+    self.walkFrame = self.walkFrame + 10 * dt
+    if (self.walkFrame >= 7) then self.walkFrame = 1 end
 
     self.x = self.x + self.speed * dt
     if self.x + self.width > 1875 then
@@ -26,7 +29,15 @@ function Enemy:update(dt)
 end
 
 function Enemy:draw()
-    love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+    local direction = self.speed > 0 and 1 or -1
+    love.graphics.draw(
+        self.walkAnimation[math.floor(self.walkFrame)], 
+        self.x  + (self.speed < 0 and 50 or 0), 
+        self.y, 
+        0, 
+        self.width / self.imageWidth * direction, 
+        self.height / self.imageHeight
+    )
 end
 
 function Enemy:attack(e, dt)

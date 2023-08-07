@@ -31,8 +31,8 @@ function love.load()
 
     love.window.setMode(800, 600, {resizable=true, vsync=false})
     background = love.graphics.newImage("imageAssets/background/back2.png")
-    tiles= love.graphics.newImage("imageAssets/background/Tile_02.png")
-    dirt= love.graphics.newImage("imageAssets/background/Tile_12.png")
+    tiles = love.graphics.newImage("imageAssets/background/Tile_02.png")
+    dirt = love.graphics.newImage("imageAssets/background/Tile_12.png")
     tree2 = love.graphics.newImage("imageAssets/background/2.png")
     tree3 = love.graphics.newImage("imageAssets/background/3.png")
     rock = love.graphics.newImage("imageAssets/background/rock1.png")
@@ -136,17 +136,17 @@ function love.draw()
     end
 
     love.graphics.draw(background, -400, 0, 0, (windowsWidth + 750) / background:getWidth(), (windowsHeight - 225) / background:getHeight())
-    for i, v in ipairs(enemy) do
-        love.graphics.setColor(1, 0, 0)
-        v:draw()
-        v:drawHealthBar()
-    end
     love.graphics.setColor(0, 1, 0)
     crystal:draw()
     love.graphics.setColor(0, 0.5, 1)
     player:draw()
 
     love.graphics.setColor(1, 1, 1)
+    for i, v in ipairs(enemy) do
+        v:draw()
+        v:drawHealthBar()
+    end
+
     local tilesWidth = tiles:getWidth()
     local tilesHeight = tiles:getHeight()
     local floorHeight = windowsHeight / 2 + 110
