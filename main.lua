@@ -83,7 +83,6 @@ function love.update(dt)
         else
             if enemy[i]:resolveCollision(crystal) and not crystal.defeat then
                 enemy[i]:attack(crystal, dt)
-                crystal:update(dt)
             end
             for j = #towers.walls, 1, -1 do
                 if enemy[i]:resolveCollision(towers.walls[j]) then
@@ -104,6 +103,7 @@ function love.update(dt)
             end
         end
     end
+    crystal:update(dt)
 
     offsetX = -player.x + love.graphics.getWidth() / 2
     offsetY = -player.y + love.graphics.getHeight() / 2
