@@ -4,10 +4,9 @@ for i = 0, 6 do
     local walkingFile = "imageAssets/goblin/WALK_00" .. i .. ".png"
     local attackFile = "imageAssets/goblin/ATTAK_00" .. i .. ".png"
     local walkingImage = love.graphics.newImage(walkingFile)
-    local AttackImage = love.graphics.newImage(attackFile)
-    print(AttackImage)
+    local attackImage = love.graphics.newImage(attackFile)
     table.insert(goblinWalkAnimation, walkingImage)
-    table.insert(goblinAttackAnimation, AttackImage)
+    table.insert(goblinAttackAnimation, attackImage)
 end
 
 
@@ -15,7 +14,7 @@ end
 Goblin = Enemy:extend()
 
 Goblin.waves = {
-    {enemyHealth = 100, enemyNum = 7},
+    {enemyHealth = 100, enemyNum = 1},
     {enemyHealth = 125, enemyNum = 10},
     {enemyHealth = 150, enemyNum = 15},
     {enemyHealth = 150, enemyNum = 25},

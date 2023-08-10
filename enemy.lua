@@ -23,10 +23,9 @@ function Enemy:update(dt)
     local frameSpeed = 10
     if not self.attacking then
         self.currentAction = "walk"
-    elseif self.time >= 1 then
-        self.frame = 2
+    elseif self.time > 1 then
+        self.frame = 1
     end
-    print(self.time)
     local currentAnimation = self.animation[self.currentAction]
     self.frame = self.frame + frameSpeed * dt
     if (self.frame >= #currentAnimation) then self.frame = 1 end
@@ -57,8 +56,8 @@ end
 
 function Enemy:attack(e, dt)
     self.attacking = true
-    self.currentAction = "attack"
     self.time = self.time - dt
+    self.currentAction = "attack"
     if self.time <= 0 then
         if e:is(Crystal) then
             self.time = 3
