@@ -1,9 +1,15 @@
 local goblinWalkAnimation = {}
+local goblinAttackAnimation = {}
 for i = 0, 6 do
-    local filename = "imageAssets/goblin/WALK_00" .. i .. ".png"
-    local image = love.graphics.newImage(filename)
-    table.insert(goblinWalkAnimation, image)
+    local walkingFile = "imageAssets/goblin/WALK_00" .. i .. ".png"
+    local attackFile = "imageAssets/goblin/ATTAK_00" .. i .. ".png"
+    local walkingImage = love.graphics.newImage(walkingFile)
+    local AttackImage = love.graphics.newImage(attackFile)
+    print(AttackImage)
+    table.insert(goblinWalkAnimation, walkingImage)
+    table.insert(goblinAttackAnimation, AttackImage)
 end
+
 
 
 Goblin = Enemy:extend()
@@ -28,7 +34,6 @@ function Goblin:new(x, y, index)
     self.height = 50
     self.width = 50
     self.time = 0
-    self.walkAnimation = goblinWalkAnimation
-    self.imageWidth = self.walkAnimation[1]:getWidth()
-    self.imageHeight = self.walkAnimation[1]:getHeight()
+    self.animation["walk"] = goblinWalkAnimation
+    self.animation["attack"] = goblinAttackAnimation
 end
