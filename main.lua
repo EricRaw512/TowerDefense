@@ -83,6 +83,8 @@ function love.update(dt)
         else
             if enemy[i]:resolveCollision(crystal) and not crystal.defeat then
                 enemy[i]:attack(crystal, dt)
+            else
+                enemy[i]:stopAttacking()
             end
             for j = #towers.walls, 1, -1 do
                 if enemy[i]:resolveCollision(towers.walls[j]) then

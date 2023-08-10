@@ -12,13 +12,24 @@ function Enemy:new(x, y)
     self.maxHP = self.hp
     self.width = 0
     self.height = 0
-    self.walkFrame = 1
+    self.animation = {}
+    self.attacking = false
+    self.currentAction = "walk"
+    self.frame = 1
 end
 
 function Enemy:update(dt)
     Enemy.super.update(self, dt)
-    self.walkFrame = self.walkFrame + 10 * dt
-    if (self.walkFrame >= 7) then self.walkFrame = 1 end
+    local frameSpeed = 10
+    if not self.attacking then
+        self.currentAction = "walk"
+    elseif self.time >= 1 then
+        self.frame = 2
+    end
+    print(self.time)
+    local currentAnimation = self.animation[self.currentAction]
+    self.frame = self.frame + frameSpeed * dt
+    if (self.frame >= #currentAnimation) then self.frame = 1 end
 
     self.x = self.x + self.speed * dt
     if self.x + self.width > 1875 then
@@ -30,17 +41,23 @@ end
 
 function Enemy:draw()
     local direction = self.speed > 0 and 1 or -1
+    local currentAnimation = self.animation[self.currentAction]
+    local currentImage = currentAnimation[math.floor(self.frame)]
+    local imageWidth = currentImage:getWidth()
+    local imageHeight = currentImage:getHeight()
     love.graphics.draw(
-        self.walkAnimation[math.floor(self.walkFrame)], 
-        self.x  + (self.speed < 0 and 50 or 0), 
+        currentImage, 
+        self.x  + (self.speed < 0 and self.width or 0), 
         self.y, 
         0, 
-        self.width / self.imageWidth * direction, 
-        self.height / self.imageHeight
+        self.width / imageWidth * direction, 
+        self.height / imageHeight
     )
 end
 
 function Enemy:attack(e, dt)
+    self.attacking = true
+    self.currentAction = "attack"
     self.time = self.time - dt
     if self.time <= 0 then
         if e:is(Crystal) then
@@ -56,4 +73,8 @@ function Enemy:attack(e, dt)
             end
         end
     end
+end
+
+function Enemy:stopAttacking()
+    self.attacking = false
 end

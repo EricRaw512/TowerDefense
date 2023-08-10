@@ -33,7 +33,6 @@ end
 
 function Crystal:update(dt)
     self.animation = self.animation + 5 * dt
-    print(self.animation)
     if (self.animation >= 7) then 
         self.animation = 1
     end
