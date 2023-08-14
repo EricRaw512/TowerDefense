@@ -136,7 +136,6 @@ function love.draw()
     background:drawBack()
 
     crystal:draw()
-    love.graphics.setColor(0, 0.5, 1)
     player:draw()
     love.graphics.setColor(1, 1, 1)
     for i, v in ipairs(enemy) do

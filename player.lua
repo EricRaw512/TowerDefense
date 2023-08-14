@@ -1,4 +1,14 @@
 --> file: player.lua
+local walkingAnimation = {}
+local jumpAnimation = {}
+local standingAnimation = {} 
+table.insert(standingAnimation, love.graphics.newImage("imageAssets/player/bunny1_stand.png"))
+table.insert(jumpAnimation, love.graphics.newImage("imageAssets/player/bunny1_jump.png"))
+
+for i = 1 , 2 do
+    local walkFrame = love.graphics.newImage("imageAssets/player/bunny1_walk" ..i.. ".png")
+    table.insert(walkingAnimation, walkFrame)
+end
 
 Player = Entity:extend()
 
@@ -9,11 +19,21 @@ function Player:new(x, y, width, height, hp)
     self.strength = 100
     self.facingAngle = 0
     self.canJump =false
+    local playerAnimations = {
+        idle = standingAnimation,
+        walk = walkingAnimation,
+        jump = jumpAnimation
+    }
+    self.animation = playerAnimations
+    self.frame = 1
+    self.imageWidth = self.animation["idle"][1]:getWidth()
+    self.imageHeight = self.animation["idle"][1]:getHeight()
 end
 
 function Player:update(dt)
     Player.super.update(self, dt)
     local movementSpeed = 200 * dt
+    self.frame = self.frame + 10 * dt
     if love.keyboard.isDown("left") then
         self.x = self.x - movementSpeed
         self.facingAngle = math.pi
@@ -36,7 +56,25 @@ function Player:update(dt)
 end
 
 function Player:draw()
-    love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+    local currentAnimation = self.animation["idle"]
+    local numFrames = 1
+
+    if self.gravity < 0 then
+        currentAnimation = self.animation["jump"]
+    elseif love.keyboard.isDown("left") or love.keyboard.isDown("right") then
+        currentAnimation = self.animation["walk"]
+        numFrames = 2
+    end
+    local currentFrame = math.floor(love.timer.getTime() * 10) % numFrames + 1
+    
+    love.graphics.draw(
+        currentAnimation[currentFrame],
+        self.x + (self.facingAngle == 0 and 0 or self.width), 
+        self.y, 
+        0, 
+        self.width / self.imageWidth * (self.facingAngle == 0 and 1 or -1), 
+        self.height / self.imageHeight
+    )
 end
 
 function Player:jump()
