@@ -1,3 +1,4 @@
+local image = love.graphics.newImage("imageAssets/platform/wood_platform.png")
 Platform = Entity:extend()
 
 function Platform:new(x, y, index)
@@ -11,8 +12,18 @@ function Platform:new(x, y, index)
     self.height = 20
     self.strength = 160
     self.maxHP = self.hp
+    self.image = image
+    self.imageWidth = image:getWidth()
+    self.imageHeight = image:getHeight()
 end
 
 function Platform:draw()
-    love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
+    love.graphics.draw(
+        self.image,
+        self.x,
+        self.y,
+        0,
+        self.width / self.imageWidth,
+        self.height / self.imageHeight
+    )
 end

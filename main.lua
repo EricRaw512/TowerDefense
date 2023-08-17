@@ -11,7 +11,7 @@ local timeLimit = 0
 local placingTower = false
 local towerType = 0
 local placeTowerFlag = false
-local startingPoint = 500
+local startingPoint = 5000
 local wavesDelay = 60
 local enemyNum = 0
 local spawn = true
@@ -41,6 +41,7 @@ function love.load()
     }
     platform = {}
     background = Background(windowsWidth, windowsHeight)
+    placingTowerGrid = love.graphics.newImage("imageAssets/player/place_tower.png")
 
     offsetX = -player.x + love.graphics.getWidth() / 2
     offsetY = -player.y + love.graphics.getHeight() / 2
@@ -136,39 +137,40 @@ function love.draw()
     background:drawBack()
 
     crystal:draw()
-    player:draw()
-    love.graphics.setColor(1, 1, 1)
     for i, v in ipairs(enemy) do
         v:draw()
         v:drawHealthBar()
     end
-
-    love.graphics.setColor(0.5, 1, 1)
     for i, wall in ipairs(towers.walls) do
         wall:draw()
         wall:drawHealthBar()
     end
     for i, tower in ipairs(towers.archerTower) do
         tower:drawTower()
-        tower:drawBullet()
         tower:drawHealthBar()
     end
     for i, plat in ipairs(platform) do
-        love.graphics.setColor(0.5, 0., 0.5)
         plat:resolveCollision(player)
         plat:draw()
         plat:drawHealthBar()
     end
 
-    love.graphics.setColor(1, 1, 1)
+    player:draw()
     background:draw()
     
     if placingTower then
         local destinationX, destinationY = placeInFrontOfCharacter(player)
-        love.graphics.rectangle("line", destinationX, destinationY, 50, 50)
+        --love.graphics.rectangle("line", destinationX, destinationY, 50, 50)
+        love.graphics.draw(
+            placingTowerGrid,
+            destinationX,
+            destinationY,
+            0,
+            50 / placingTowerGrid:getWidth(),
+            50 / placingTowerGrid:getHeight()
+        )
     end
     love.graphics.origin()
-    love.graphics.setColor(1, 1, 1)
     love.graphics.print("Points : " .. startingPoint, 10, 10)
     if wavesDelay > 0 then
         love.graphics.print("Wave "..wave.." Start In", love.graphics.getWidth() / 2 - 50, 10)

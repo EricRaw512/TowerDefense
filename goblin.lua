@@ -14,7 +14,7 @@ end
 Goblin = Enemy:extend()
 
 Goblin.waves = {
-    {enemyHealth = 100, enemyNum = 1},
+    {enemyHealth = 100, enemyNum = 7},
     {enemyHealth = 125, enemyNum = 10},
     {enemyHealth = 150, enemyNum = 15},
     {enemyHealth = 150, enemyNum = 25},

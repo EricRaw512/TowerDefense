@@ -1,3 +1,5 @@
+--> tower.lua
+local turretImage = love.graphics.newImage("imageAssets/turret/turret2-big.png")
 
 Tower = Entity:extend()
 
@@ -10,6 +12,10 @@ function Tower:new(x, y)
     self.timer = 0
     self.strength = 200
     self.maxHP = self.hp
+    self.image = turretImage
+    self.imageWidth = self.image:getWidth()
+    self.imageHeight = self.image:getHeight()
+    self.angle = 1
 end
 
 function Tower:update(dt, enemy)
@@ -41,6 +47,7 @@ function Tower:target(e)
     if distance <= 200 and self.timer <= 0 then
         self.timer = 2
         local angle = math.atan2(distanceY, distanceX)
+        self.angle = (angle < math.pi * 1.5 and angle > math.pi * 0.5) and -1 or 1
         table.insert(self.bullets, {
             x = self.x + self.width / 2+ math.cos(angle),
             y = self.y + self.height / 2 + math.sin(angle),
@@ -50,15 +57,18 @@ function Tower:target(e)
 end
 
 function Tower:drawTower()
-    love.graphics.setColor(0, 1, 1)
-    love.graphics.rectangle("fill", self.x, self.y, self.width, self.height)
-end
-
-function Tower:drawBullet()
     for i, bullet in ipairs(self.bullets) do
-        love.graphics.setColor(1, 1, 1)
         love.graphics.circle("fill", bullet.x, bullet.y, 5)
     end
+    
+    love.graphics.draw(
+        self.image,
+        self.x + (self.angle == -1 and self.width or 0),
+        self.y - 30,
+        0,
+        self.width / self.imageWidth * self.angle,
+        0.8
+    )
 end
 
 function Tower:bulletCollision(bullet, e)
