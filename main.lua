@@ -11,7 +11,7 @@ local timeLimit = 0
 local placingTower = false
 local towerType = 0
 local placeTowerFlag = false
-local startingPoint = 5000
+local startingPoint = 500
 local wavesDelay = 60
 local enemyNum = 0
 local spawn = true
@@ -54,7 +54,7 @@ function love.update(dt)
         wavesDelay = wavesDelay - dt
     elseif wavesDelay <= 0 then
         if spawn then
-            enemyNum = Goblin.waves[wave].enemyNum * 2
+            enemyNum = Goblin:CreateWave(wave)
             spawn = false
         end
         leftSpawnTimer = leftSpawnTimer - dt
@@ -122,9 +122,6 @@ function love.update(dt)
     if not crystal.defeat and #enemy == 0 and wavesDelay <= 0 and enemyNum <= 0 and not spawn then
         wavesDelay = 60
         wave = wave + 1
-        if wave > 8 then
-            wave = 8
-        end
         spawn = true
     end
 end
@@ -169,6 +166,9 @@ function love.draw()
             50 / placingTowerGrid:getWidth(),
             50 / placingTowerGrid:getHeight()
         )
+    end
+    if deleteGrid then
+        local destinationX, destinationY = placeInFrontOfCharacter(player)
     end
     love.graphics.origin()
     love.graphics.print("Points : " .. startingPoint, 10, 10)
@@ -223,7 +223,7 @@ function placeTower(towerX, towerY, towerType)
         if towerY < 600 then
             for i, v in ipairs(platform) do
                 if v.y == towerY + gridSize and v.x == towerX then
-                    startingPoint = startingPoint - 200
+                    startingPoint = startingPoint - 100
                     towerInsert(towerType, towerX, towerY)
                 end
             end
@@ -355,20 +355,27 @@ end
 function deleteTower(gridX, gridY)
     for i, t in ipairs(towers.archerTower) do
         if t.x == gridX and t.y == gridY then
+            startingPoint = startingPoint + math.floor(t.hp * 0.5) -- Refund half of the tower's health value
+            table.remove(towers.archerTower, i)
             return true
         end
     end
     for i, t in ipairs(towers.walls) do
         if t.x == gridX and t.y == gridY then
+            startingPoint = startingPoint + math.floor(t.hp * 0.5)
+            table.remove(towers.walls, i)
             return true
         end
     end
     for i, t in ipairs(platform) do
         if t.x == gridX and t.y == gridY then
+            startingPoint = startingPoint + math.floor(t.hp * 0.5)
+            table.remove(platform, i)
             return true
         end
     end
 end
+
 
 ---@diagnostic disable-next-line: undefined-field
 local love_errorhandler = love.errhand
