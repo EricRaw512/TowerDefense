@@ -16,7 +16,7 @@ local wavesDelay = 60
 local enemyNum = 0
 local spawn = true
 local gridSize = 50
-local deleteGrid = false
+local deleteTower = false
 
 function love.load()
     Objects = require "classic"
@@ -41,6 +41,8 @@ function love.load()
     }
     platform = {}
     background = Background(windowsWidth, windowsHeight)
+    deleteTowerGrid = love.graphics.newImage("imageAssets/player/delete_tower.png")
+
     placingTowerGrid = love.graphics.newImage("imageAssets/player/place_tower.png")
 
     offsetX = -player.x + love.graphics.getWidth() / 2
@@ -167,8 +169,16 @@ function love.draw()
             50 / placingTowerGrid:getHeight()
         )
     end
-    if deleteGrid then
+    if deleteTower then
         local destinationX, destinationY = placeInFrontOfCharacter(player)
+        love.graphics.draw(
+            deleteTowerGrid,
+            destinationX,
+            destinationY,
+            0,
+            50 / placingTowerGrid:getWidth(),
+            50 / placingTowerGrid:getHeight()
+        )
     end
     love.graphics.origin()
     love.graphics.print("Points : " .. startingPoint, 10, 10)
@@ -187,23 +197,35 @@ function love.keypressed(key)
         player:jump()
     elseif key == '1' and startingPoint >= 100 then
         placingTower = true
+        deleteTower = false
         towerType = 1
     elseif key == '2' and startingPoint >= 100 then
         placingTower = true
+        deleteTower = false
         towerType = 2
     elseif key == '3' and startingPoint >= 500 then
         placingTower = true
+        deleteTower = false
         towerType = 3
+    elseif key == 'p' then
+        deleteTower = true
+        placingTower = false
     elseif key == 'down' then
         goDownplatform()
-    elseif key == "space" and not placeTowerFlag and player.gravity == 0 and placingTower then
-        if not playerOnEnemy() then
+    elseif key == "space" then
+        if placingTower and not playerOnEnemy() and not placeTowerFlag and player.gravity == 0 then
             placeTowerFlag = true
             local towerX, towerY = Tower:placeInFrontOfCharacter(player)
             if towerX > 100 and towerX < 1800 and not isOccupied(towerX, towerY, towerType) then
                 placingTower = placeTower(towerX, towerY, towerType)
             end
+        elseif deleteTower and player.gravity == 0 then
+            local towerX, towerY = Tower:placeInFrontOfCharacter(player)
+            if refundTower(towerX, towerY) then
+                deleteTower = false
+            end
         end
+
     elseif key == "f1" then
         wavesDelay = 0
     end
@@ -352,24 +374,24 @@ function towerInsert(towerType, towerX, towerY)
 end
 
 --refund the tower based on the hp
-function deleteTower(gridX, gridY)
+function refundTower(gridX, gridY)
     for i, t in ipairs(towers.archerTower) do
         if t.x == gridX and t.y == gridY then
-            startingPoint = startingPoint + math.floor(t.hp * 0.5) -- Refund half of the tower's health value
+            startingPoint = startingPoint + math.floor(t.value / 2 * (t.hp / t.maxHp)) -- Refund half of the tower's health value
             table.remove(towers.archerTower, i)
             return true
         end
     end
     for i, t in ipairs(towers.walls) do
         if t.x == gridX and t.y == gridY then
-            startingPoint = startingPoint + math.floor(t.hp * 0.5)
+            startingPoint = startingPoint + math.floor(t.value / 2 * (t.hp / t.maxHp))
             table.remove(towers.walls, i)
             return true
         end
     end
     for i, t in ipairs(platform) do
         if t.x == gridX and t.y == gridY then
-            startingPoint = startingPoint + math.floor(t.hp * 0.5)
+            startingPoint = startingPoint + math.floor(t.value / 2 * (t.hp / t.maxHp))
             table.remove(platform, i)
             return true
         end

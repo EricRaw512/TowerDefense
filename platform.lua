@@ -11,7 +11,8 @@ function Platform:new(x, y, index)
     self.width = 50
     self.height = 20
     self.strength = 160
-    self.maxHP = self.hp
+    self.value = 500
+    self.maxHp = 250
     self.image = image
     self.imageWidth = image:getWidth()
     self.imageHeight = image:getHeight()

@@ -11,11 +11,12 @@ function Tower:new(x, y)
     self.bullets = {}
     self.timer = 0
     self.strength = 200
-    self.maxHP = self.hp
+    self.maxHp = 250
     self.image = turretImage
     self.imageWidth = self.image:getWidth()
     self.imageHeight = self.image:getHeight()
     self.angle = 1
+    self.value = 100
 end
 
 function Tower:update(dt, enemy)

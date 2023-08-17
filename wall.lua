@@ -7,7 +7,8 @@ function Wall:new(x, y)
     self.strength = 200
     self.width = 50
     self.height = 50
-    self.maxHP = self.hp
+    self.value = 100
+    self.maxHp = 500
     self.image = image
     self.imageWidth = image:getWidth()
     self.imageHeight = image:getHeight()
