@@ -4,19 +4,20 @@ end
 
 local windowsWidth = 1920
 local windowsHeight = 1080
-local wave = 1
-local leftSpawnTimer = 0
-local rightSpawnTimer = 5
+local wave
+local leftSpawnTimer 
+local rightSpawnTime
 local timeLimit = 0
 local placingTower = false
 local towerType = 0
 local placeTowerFlag = false
-local startingPoint = 500
+local startingPoint
 local wavesDelay = 60
-local enemyNum = 0
-local spawn = true
+local enemyNum
+local spawn
 local gridSize = 50
 local deleteTower = false
+local gameOver
 
 function love.load()
     Objects = require "classic"
@@ -31,100 +32,113 @@ function love.load()
     require "background"
 
     love.window.setMode(800, 600, {resizable=true, vsync=false})
-
-    enemy = {}
-    crystal = Crystal(windowsWidth / 2 - 10, windowsHeight / 2 + 10, 50, 100)
-    player = Player(windowsWidth / 2, windowsHeight / 2 + 60, 50, 50)
-    towers = {
-        archerTower = {},
-        walls = {}
-    }
-    platform = {}
     background = Background(windowsWidth, windowsHeight)
     deleteTowerGrid = love.graphics.newImage("imageAssets/player/delete_tower.png")
-
     placingTowerGrid = love.graphics.newImage("imageAssets/player/place_tower.png")
 
+    function resetGame()
+        gameOver = false
+        wave = 1
+        leftSpawnTimer = 0
+        rightSpawnTimer = 2
+        startingPoint = 1000
+        enemyNum = 0
+        spawn = true
+        crystal = Crystal(windowsWidth / 2 - 10, windowsHeight / 2 + 10, 50, 100)
+        enemy = {}
+        player = Player(windowsWidth / 2, windowsHeight / 2 + 60, 50, 50)
+        towers = {
+            archerTower = {},
+            walls = {}
+        }
+        platform = {}
+    end
+    resetGame()
     offsetX = -player.x + love.graphics.getWidth() / 2
     offsetY = -player.y + love.graphics.getHeight() / 2
 end
 
 function love.update(dt)
-    player:update(dt)
+    if not gameOver then
+        player:update(dt)
 
-    if wavesDelay > 0 then
-        wavesDelay = wavesDelay - dt
-    elseif wavesDelay <= 0 then
-        if spawn then
-            enemyNum = Goblin:CreateWave(wave)
-            spawn = false
-        end
-        leftSpawnTimer = leftSpawnTimer - dt
-        rightSpawnTimer = rightSpawnTimer - dt
-        if enemyNum > 0 then
-            if  leftSpawnTimer <= timeLimit then
-                leftSpawnTimer = spawnEnemy(100)
+        if wavesDelay > 0 then
+            wavesDelay = wavesDelay - dt
+        elseif wavesDelay <= 0 then
+            if spawn then
+                enemyNum = Goblin:CreateWave(wave)
+                spawn = false
             end
-    
-            if rightSpawnTimer <= timeLimit then
-                rightSpawnTimer = spawnEnemy(1810)
+            leftSpawnTimer = leftSpawnTimer - dt
+            rightSpawnTimer = rightSpawnTimer - dt
+            if enemyNum > 0 then
+                if  leftSpawnTimer <= timeLimit then
+                    leftSpawnTimer = spawnEnemy(100)
+                end
+        
+                if rightSpawnTimer <= timeLimit then
+                    rightSpawnTimer = spawnEnemy(1810)
+                end
             end
         end
-    end
 
-    for i = #enemy, 1, -1 do
-        enemy[i]:update(dt)
-        enemy[i]:resolveCollision(player)
-        if enemy[i].hp <= 0 then
-            enemyNum = enemyNum - 1
-            table.remove(enemy, i)
-            startingPoint = startingPoint + 50
-        else
-            if enemy[i]:resolveCollision(crystal) and not crystal.defeat then
-                enemy[i]:attack(crystal, dt)
+        for i = #enemy, 1, -1 do
+            enemy[i]:update(dt)
+            enemy[i]:resolveCollision(player)
+            if enemy[i].hp <= 0 then
+                enemyNum = enemyNum - 1
+                table.remove(enemy, i)
+                startingPoint = startingPoint + 50
             else
-                enemy[i]:stopAttacking()
-            end
-            for j = #towers.walls, 1, -1 do
-                if enemy[i]:resolveCollision(towers.walls[j]) then
-                    enemy[i]:attack(towers.walls[j], dt)
+                if enemy[i]:resolveCollision(crystal) and not crystal.defeat then
+                    enemy[i]:attack(crystal, dt)
+                else
+                    enemy[i]:stopAttacking()
                 end
-                if towers.walls[j].hp <= 0 then
-                    table.remove(towers.walls, j)
+                for j = #towers.walls, 1, -1 do
+                    if enemy[i]:resolveCollision(towers.walls[j]) then
+                        enemy[i]:attack(towers.walls[j], dt)
+                    end
+                    if towers.walls[j].hp <= 0 then
+                        table.remove(towers.walls, j)
+                    end
                 end
-            end
-            for j = #platform, 1, -1 do
-                if enemy[i]:resolveCollision(platform[j]) then
-                    enemy[i]:attack(platform[j], dt)
-                end
-                if platform[j].hp <= 0 then
-                    removeOnPlatform(j)
-                    table.remove(platform, j)
+                for j = #platform, 1, -1 do
+                    if enemy[i]:resolveCollision(platform[j]) then
+                        enemy[i]:attack(platform[j], dt)
+                    end
+                    if platform[j].hp <= 0 then
+                        removeOnPlatform(j)
+                        table.remove(platform, j)
+                    end
                 end
             end
         end
-    end
-    crystal:update(dt)
+        crystal:update(dt)
 
-    offsetX = -player.x + love.graphics.getWidth() / 2
-    offsetY = -player.y + love.graphics.getHeight() / 2
-    for i =#towers.archerTower, 1, -1 do
-        towers.archerTower[i]:update(dt, enemy)
-        for j = #enemy, 1, -1 do
-            towers.archerTower[i]:target(enemy[j])
-            if enemy[j]:resolveCollision(towers.archerTower[i]) then
-                enemy[j]:attack(towers.archerTower[i], dt)
+        offsetX = -player.x + love.graphics.getWidth() / 2
+        offsetY = -player.y + love.graphics.getHeight() / 2
+        for i =#towers.archerTower, 1, -1 do
+            towers.archerTower[i]:update(dt, enemy)
+            for j = #enemy, 1, -1 do
+                towers.archerTower[i]:target(enemy[j])
+                if enemy[j]:resolveCollision(towers.archerTower[i]) then
+                    enemy[j]:attack(towers.archerTower[i], dt)
+                end
+            end
+            if towers.archerTower[i].hp < 0 then
+                table.remove(towers.archerTower, i)
             end
         end
-        if towers.archerTower[i].hp < 0 then
-            table.remove(towers.archerTower, i)
-        end
-    end
 
-    if not crystal.defeat and #enemy == 0 and wavesDelay <= 0 and enemyNum <= 0 and not spawn then
-        wavesDelay = 60
-        wave = wave + 1
-        spawn = true
+        if not crystal.defeat and #enemy == 0 and wavesDelay <= 0 and enemyNum <= 0 and not spawn then
+            wavesDelay = 60
+            wave = wave + 1
+            spawn = true
+        end
+        if crystal.defeat then
+            gameOver = true
+        end
     end
 end
 
@@ -132,104 +146,119 @@ function love.draw()
     if love.graphics.getWidth() ~= 1920 and love.graphics.getHeight() ~= 1080 then
         love.graphics.translate(offsetX, offsetY)
     end
-
-    background:drawBack()
-
-    crystal:draw()
-    for i, v in ipairs(enemy) do
-        v:draw()
-        v:drawHealthBar()
-    end
-    for i, wall in ipairs(towers.walls) do
-        wall:draw()
-        wall:drawHealthBar()
-    end
-    for i, tower in ipairs(towers.archerTower) do
-        tower:drawTower()
-        tower:drawHealthBar()
-    end
-    for i, plat in ipairs(platform) do
-        plat:resolveCollision(player)
-        plat:draw()
-        plat:drawHealthBar()
-    end
-
-    player:draw()
-    background:draw()
+    if gameOver then
+        love.graphics.setColor(0, 0, 0, 0.7)
+        love.graphics.rectangle("fill", 0, 0, windowsWidth, windowsHeight)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print("GAME OVER", windowsWidth / 2 - 50, windowsHeight / 2 - 20)
+        love.graphics.print("Press R to restart", windowsWidth / 2 - 65, windowsHeight / 2 + 20)
+    else
+        background:drawBack()
     
-    if placingTower then
-        local destinationX, destinationY = placeInFrontOfCharacter(player)
-        --love.graphics.rectangle("line", destinationX, destinationY, 50, 50)
-        love.graphics.draw(
-            placingTowerGrid,
-            destinationX,
-            destinationY,
-            0,
-            50 / placingTowerGrid:getWidth(),
-            50 / placingTowerGrid:getHeight()
-        )
-    end
-    if deleteTower then
-        local destinationX, destinationY = placeInFrontOfCharacter(player)
-        love.graphics.draw(
-            deleteTowerGrid,
-            destinationX,
-            destinationY,
-            0,
-            50 / placingTowerGrid:getWidth(),
-            50 / placingTowerGrid:getHeight()
-        )
-    end
-    love.graphics.origin()
-    love.graphics.print("Points : " .. startingPoint, 10, 10)
-    if wavesDelay > 0 then
-        love.graphics.print("Wave "..wave.." Start In", love.graphics.getWidth() / 2 - 50, 10)
-        love.graphics.print(string.format("%.0f", wavesDelay), love.graphics.getWidth() / 2 - 15, 30)
-        love.graphics.print("Press F1 to start the round", love.graphics.getWidth() / 2 - 80, 50)
-    end
-    if crystal.defeat then
-        love.graphics.print("YOU LOSE", love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
+        crystal:draw()
+        for i, v in ipairs(enemy) do
+            v:draw()
+            v:drawHealthBar()
+        end
+        for i, wall in ipairs(towers.walls) do
+            wall:draw()
+            wall:drawHealthBar()
+        end
+        for i, tower in ipairs(towers.archerTower) do
+            tower:drawTower()
+            tower:drawHealthBar()
+        end
+        for i, plat in ipairs(platform) do
+            plat:resolveCollision(player)
+            plat:draw()
+            plat:drawHealthBar()
+        end
+    
+        player:draw()
+        background:draw()
+        
+        if placingTower then
+            local destinationX, destinationY = placeInFrontOfCharacter(player)
+            --love.graphics.rectangle("line", destinationX, destinationY, 50, 50)
+            love.graphics.draw(
+                placingTowerGrid,
+                destinationX,
+                destinationY,
+                0,
+                50 / placingTowerGrid:getWidth(),
+                50 / placingTowerGrid:getHeight()
+            )
+        end
+        if deleteTower then
+            local destinationX, destinationY = placeInFrontOfCharacter(player)
+            love.graphics.draw(
+                deleteTowerGrid,
+                destinationX,
+                destinationY,
+                0,
+                50 / placingTowerGrid:getWidth(),
+                50 / placingTowerGrid:getHeight()
+            )
+        end
+        love.graphics.origin()
+        love.graphics.print("Points : " .. startingPoint, 10, 10)
+        love.graphics.print("[1] Archer Tower (100)", 10, windowsHeight / 2 - 40)
+        love.graphics.print("[2] Wall (100)", 10, windowsHeight  / 2 - 20)
+        love.graphics.print("[3] Platform (500)", 10, windowsHeight / 2)
+        love.graphics.print("[P] Refund Tower", 10, windowsHeight /2 + 20)
+
+        if wavesDelay > 0 then
+            love.graphics.print("Wave "..wave.." Start In", love.graphics.getWidth() / 2 - 50, 10)
+            love.graphics.print(string.format("%.0f", wavesDelay), love.graphics.getWidth() / 2 - 15, 30)
+            love.graphics.print("Press F1 to start the round", love.graphics.getWidth() / 2 - 80, 50)
+        end
     end
 end
 
 function love.keypressed(key)
-    if key == "up" then
-        player:jump()
-    elseif key == '1' and startingPoint >= 100 then
-        placingTower = true
-        deleteTower = false
-        towerType = 1
-    elseif key == '2' and startingPoint >= 100 then
-        placingTower = true
-        deleteTower = false
-        towerType = 2
-    elseif key == '3' and startingPoint >= 500 then
-        placingTower = true
-        deleteTower = false
-        towerType = 3
-    elseif key == 'p' then
-        deleteTower = true
-        placingTower = false
-    elseif key == 'down' then
-        goDownplatform()
-    elseif key == "space" then
-        if placingTower and not playerOnEnemy() and not placeTowerFlag and player.gravity == 0 then
-            placeTowerFlag = true
-            local towerX, towerY = Tower:placeInFrontOfCharacter(player)
-            if towerX > 100 and towerX < 1800 and not isOccupied(towerX, towerY, towerType) then
-                placingTower = placeTower(towerX, towerY, towerType)
+    if not gameOver then
+        if key == "up" then
+            player:jump()
+        elseif key == '1' and startingPoint >= 100 then
+            placingTower = true
+            deleteTower = false
+            towerType = 1
+        elseif key == '2' and startingPoint >= 100 then
+            placingTower = true
+            deleteTower = false
+            towerType = 2
+        elseif key == '3' and startingPoint >= 500 then
+            placingTower = true
+            deleteTower = false
+            towerType = 3
+        elseif key == 'p' then
+            deleteTower = true
+            placingTower = false
+        elseif key == 'down' then
+            goDownplatform()
+        elseif key == "space" then
+            if placingTower and not playerOnEnemy() and not placeTowerFlag and player.gravity == 0 then
+                placeTowerFlag = true
+                local towerX, towerY = Tower:placeInFrontOfCharacter(player)
+                if towerX > 100 and towerX < 1800 and not isOccupied(towerX, towerY, towerType) then
+                    placingTower = placeTower(towerX, towerY, towerType)
+                end
+            elseif deleteTower and player.gravity == 0 then
+                local towerX, towerY = Tower:placeInFrontOfCharacter(player)
+                if refundTower(towerX, towerY) then
+                    deleteTower = false
+                end
             end
-        elseif deleteTower and player.gravity == 0 then
-            local towerX, towerY = Tower:placeInFrontOfCharacter(player)
-            if refundTower(towerX, towerY) then
-                deleteTower = false
-            end
+    
+        elseif key == "f1" then
+            wavesDelay = 0
         end
-
-    elseif key == "f1" then
-        wavesDelay = 0
+        placeTowerFlag = false
+    else
+        if key == 'r' then
+            resetGame()
+        end
     end
-    placeTowerFlag = false
 end
 
 -- spawn the enemy at left or right 
@@ -392,6 +421,7 @@ function refundTower(gridX, gridY)
     for i, t in ipairs(platform) do
         if t.x == gridX and t.y == gridY then
             startingPoint = startingPoint + math.floor(t.value / 2 * (t.hp / t.maxHp))
+            removeOnPlatform(i)
             table.remove(platform, i)
             return true
         end
