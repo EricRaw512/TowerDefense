@@ -34,4 +34,6 @@ Welcome to the 2D Tower Defense Game! Survive the waves of monsters approaching 
 ```bash
 git clone https://github.com/your-username/2d-tower-defense.git
 cd 2d-tower-defense
+```
 
+2. Run the application and play
